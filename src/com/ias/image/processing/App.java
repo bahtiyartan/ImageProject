@@ -8,6 +8,7 @@ import javax.swing.UIManager;
 
 public class App {
     public static void main(String[] args) {
+        nu.pattern.OpenCV.loadShared();
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
