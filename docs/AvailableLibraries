@@ -1,0 +1,21 @@
+### AVAILABLE LIBRARIES:
+
+- **OpenCV Java:** Main library, includes image enhancement (clearing faint barcodes) with **CLAHE**, noise reduction algorithms, and can handle dark environments.
+- **DeepJavaLibrary - DJL:** Enables running models like YOLO (including deep learning models). Uses PyTorch or TensorFlow engines in the background. Object detection + counting.
+- **YOLO:** Useful for object counting, has models with high detection in low light.
+- **ZXing (Zebra Crossing):** OpenCV can clarify barcodes, but a decoder is needed to read the data inside. The "Zebra Crossing" library is very good at reading barcodes.
+- **Real-ESRGAN:** If the barcode is very faint and OpenCV is no longer sufficient, an AI-based image enhancement Super-Resolution is needed. But it's a heavy model.
+- **BoofCV:** Similar to OpenCV. Includes object tracking, camera calibration, and basic image manipulation.
+- **Deeplearning4j (DL4J):** A deep learning library. This is the most stable heavyweight AI library that works with Java. It performs object detection.
+- **ND4J:** Java equivalent of NumPy, tensor processing.
+- **MediaPipe:** Very fast for human body, hand, and face tracking. May be more suitable for moving projects rather than images. Also used to detect people in the dark.
+- **TensorFlow**: General deep learning, TF Java API
+- **Tesseract OCR:** Text recognition (OCR), Tess4J wrapper. Reads text (faded text), good at reading serial numbers under barcodes.
+
+**Highlights:**
+
+**OPEN CV:** Image loading, sharpening, etc. operations.
+
+**DJL:** (For use with YOLO): Screw counting, human detection in dark environments, etc.
+
+**ZXing + Tess4J (Tesseract):** Reading data from barcodes and digitizing serial numbers under the barcodes. ZXING reads the barcode, Tess4J reads the numbers underneath.

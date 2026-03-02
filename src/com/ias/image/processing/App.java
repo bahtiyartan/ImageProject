@@ -5,6 +5,7 @@ import com.ias.image.processing.logic.ImageModel;
 import com.ias.image.processing.ui.MainFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import nu.pattern.OpenCV;
 
 public class App {
     public static void main(String[] args) {

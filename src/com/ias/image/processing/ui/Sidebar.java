@@ -70,9 +70,19 @@ public class Sidebar extends JPanel {
             }
         });
 
+        JMenuItem blurItem = new JMenuItem("Gaussian Blur");
+        blurItem.addActionListener(e -> {
+            String val = JOptionPane.showInputDialog(this, "Level of Blur (Örn: 5, 9, 15):", "5");
+            if (val != null && !val.isEmpty()) {
+                int size = Integer.parseInt(val);
+                controller.addOperation(new GaussianBlurOp(size));
+            }
+        });
+
         menu.add(cropItem);
         menu.add(rotateItem);
         menu.add(tileItem);
+        menu.add(blurItem);
 
         menu.show(invoker, 0, -menu.getPreferredSize().height);
     }
