@@ -51,8 +51,13 @@ public class ImageController {
         if (model.getOriginalImage() == null) return;
 
         BufferedImage result = model.getOriginalImage();
-        for (ImageOperation op : model.getOperations()) {
-            result = op.apply(result);
+        try {
+            for (ImageOperation op : model.getOperations()) {
+                result = op.apply(result);
+            }
+        } catch (Exception e) {
+            System.err.println("An error occurred while processing the image: " + e.getMessage());
+            e.printStackTrace();
         }
         model.setCurrentImage(result);
 

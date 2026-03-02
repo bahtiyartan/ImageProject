@@ -73,16 +73,19 @@ public class Sidebar extends JPanel {
         JMenuItem blurItem = new JMenuItem("Gaussian Blur");
         blurItem.addActionListener(e -> {
             String val = JOptionPane.showInputDialog(this, "Level of Blur", "5");
-            if (val != null && !val.isEmpty()) {
-                int size = Integer.parseInt(val);
-                controller.addOperation(new GaussianBlurOp(size));
+            if (val != null && !val.trim().isEmpty()) {
+                try {
+                    int size = Integer.parseInt(val.trim());
+                    controller.addOperation(new GaussianBlurOp(size));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid integer..");
+                }
             }
         });
-
+        menu.add(blurItem);
         menu.add(cropItem);
         menu.add(rotateItem);
         menu.add(tileItem);
-        menu.add(blurItem);
 
         menu.show(invoker, 0, -menu.getPreferredSize().height);
     }
