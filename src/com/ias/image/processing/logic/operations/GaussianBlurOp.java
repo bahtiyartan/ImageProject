@@ -11,7 +11,6 @@ public class GaussianBlurOp implements ImageOperation {
     private final int kernelSize;
 
     public GaussianBlurOp(int kernelSize) {
-        // Kernel boyutu tek sayı olmalıdır (3, 5, 7 gibi)
         this.kernelSize = (kernelSize % 2 == 0) ? kernelSize + 1 : kernelSize;
     }
 
@@ -20,13 +19,11 @@ public class GaussianBlurOp implements ImageOperation {
         Mat mat = bufferedImageToMat(img);
         Mat blurredMat = new Mat();
 
-        // OpenCV Gaussian Blur işlemi
         Imgproc.GaussianBlur(mat, blurredMat, new Size(kernelSize, kernelSize), 0);
 
         return matToBufferedImage(blurredMat);
     }
 
-    // Dönüştürücü metodlar (Aynı kalacak)
     private Mat bufferedImageToMat(BufferedImage bi) {
         Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
         byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
