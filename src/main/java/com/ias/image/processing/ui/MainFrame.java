@@ -20,6 +20,8 @@ public class MainFrame extends JFrame {
     private Point currentPoint;
     private boolean isDragging = false;
 
+    private double currentScale = 1.0;
+
     public MainFrame(ImageController controller) {
         this.controller = controller;
         this.controller.setUpdateViewCallback(this::refreshUI);
@@ -29,7 +31,7 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        display = new JLabel("Choose an Image", SwingConstants.CENTER) {
+        display = new JLabel("", SwingConstants.CENTER) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -52,7 +54,11 @@ public class MainFrame extends JFrame {
 
         sidebar = new Sidebar(controller);
         add(sidebar, BorderLayout.WEST);
-        add(new JScrollPane(display), BorderLayout.CENTER);
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(Color.LIGHT_GRAY);
+        centerPanel.add(display, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
 
         JButton loadBtn = new JButton("Select Image File");
         loadBtn.setMargin(new Insets(10, 10, 10, 10));
@@ -87,18 +93,24 @@ public class MainFrame extends JFrame {
                 if (!isDragging || !controller.isCropModeActive()) return;
 
                 isDragging = false;
-                BufferedImage img = controller.getModel().getCurrentImage();
-                if (img == null || startPoint == null) return;
+                BufferedImage realImg = controller.getModel().getCurrentImage();
+                if (realImg == null || startPoint == null) return;
 
-                int imgX = (display.getWidth() - img.getWidth()) / 2;
-                int imgY = (display.getHeight() - img.getHeight()) / 2;
+                Icon icon = display.getIcon();
+                if (icon == null) return;
+
+                int iconW = icon.getIconWidth();
+                int iconH = icon.getIconHeight();
+
+                int offsetX = (display.getWidth() - iconW) / 2;
+                int offsetY = (display.getHeight() - iconH) / 2;
 
                 Point endPoint = e.getPoint();
 
-                int x = Math.min(startPoint.x, endPoint.x) - imgX;
-                int y = Math.min(startPoint.y, endPoint.y) - imgY;
-                int w = Math.abs(startPoint.x - endPoint.x);
-                int h = Math.abs(startPoint.y - endPoint.y);
+                int x = (int) ((Math.min(startPoint.x, endPoint.x) - offsetX) / currentScale);
+                int y = (int) ((Math.min(startPoint.y, endPoint.y) - offsetY) / currentScale);
+                int w = (int) (Math.abs(startPoint.x - endPoint.x) / currentScale);
+                int h = (int) (Math.abs(startPoint.y - endPoint.y) / currentScale);
 
                 if (w > 5 && h > 5) {
                     controller.addOperation(new CropOp(x, y, w, h));
@@ -123,17 +135,35 @@ public class MainFrame extends JFrame {
     private void refreshUI() {
         BufferedImage currentImg = controller.getModel().getCurrentImage();
         if (currentImg != null) {
-            display.setIcon(new ImageIcon(currentImg));
+            display.setIcon(getScaledImageIcon(currentImg));
             display.setText("");
 
-            if (controller.isCropModeActive()) {
-                display.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-            } else {
-                display.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            }
+            display.setCursor(new Cursor(controller.isCropModeActive() ? Cursor.CROSSHAIR_CURSOR : Cursor.DEFAULT_CURSOR));
         }
         sidebar.updateList();
         display.revalidate();
         display.repaint();
+    }
+
+    private ImageIcon getScaledImageIcon(BufferedImage srcImg) {
+        int maxWidth = display.getParent().getWidth();
+        int maxHeight = display.getParent().getHeight();
+
+        if (maxWidth <= 50 || maxHeight <= 50) return new ImageIcon(srcImg);
+
+        int srcW = srcImg.getWidth();
+        int srcH = srcImg.getHeight();
+
+        double widthRatio = (double) maxWidth / srcW;
+        double heightRatio = (double) maxHeight / srcH;
+        currentScale = Math.min(widthRatio, heightRatio);
+
+        if (currentScale > 1.0) currentScale = 1.0;
+
+        int newW = (int) (srcW * currentScale);
+        int newH = (int) (srcH * currentScale);
+
+        Image scaledImg = srcImg.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImg);
     }
 }
