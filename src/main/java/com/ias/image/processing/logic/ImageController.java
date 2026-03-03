@@ -46,6 +46,15 @@ public class ImageController {
             System.out.println("There are no more actions to undo.");
         }
     }
+    public void updateOperation(int index, ImageOperation newOp) {
+        model.getOperations().set(index, newOp);
+        processImage();
+    }
+
+    public void removeOperation(int index) {
+        model.getOperations().remove(index);
+        processImage();
+    }
 
     private void processImage() {
         if (model.getOriginalImage() == null) return;
