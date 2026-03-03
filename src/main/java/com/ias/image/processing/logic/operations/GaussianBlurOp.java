@@ -11,19 +11,25 @@ import java.awt.image.DataBufferByte;
 
 public class GaussianBlurOp implements ImageOperation {
     private final int kernelSize;
+    private final double sigmaX;
+    private final int borderType;
 
-    public GaussianBlurOp(int kernelSize) {
-        this.kernelSize = (kernelSize % 2 == 0) ? kernelSize + 1 : kernelSize;
+    public GaussianBlurOp(int kernelSize, double sigmaX, int borderType) {
+        this.kernelSize = (kernelSize % 2 == 0) ? kernelSize + 1 : Math.max(1, kernelSize);
+        this.sigmaX = sigmaX;
+        this.borderType = borderType;
     }
+    public int getKernelSize() { return kernelSize; }
+    public double getSigmaX() { return sigmaX; }
+    public int getBorderType() { return borderType; }
 
     @Override
     public BufferedImage apply(BufferedImage img) {
         BufferedImage bgrImage = convertTo3ByteBGR(img);
-
         Mat mat = bufferedImageToMat(bgrImage);
         Mat blurredMat = new Mat();
 
-        Imgproc.GaussianBlur(mat, blurredMat, new Size(kernelSize, kernelSize), 0, 0, Core.BORDER_DEFAULT);
+        Imgproc.GaussianBlur(mat, blurredMat, new Size(kernelSize, kernelSize), sigmaX, 0, borderType);
 
         return matToBufferedImage(blurredMat);
     }
@@ -60,6 +66,17 @@ public class GaussianBlurOp implements ImageOperation {
 
     @Override
     public String getOperationName() {
-        return "Gaussian Blur (" + kernelSize + "x" + kernelSize + ")";
+        return "Gaussian Blur (K:" + kernelSize + ", sX:" + sigmaX + ", B:" + getBorderName(borderType) + ")";    }
+    private String getBorderName(int type) {
+        switch (type) {
+            case org.opencv.core.Core.BORDER_CONSTANT:
+                return "CONSTANT";
+            case org.opencv.core.Core.BORDER_REPLICATE:
+                return "REPLICATE";
+            case org.opencv.core.Core.BORDER_REFLECT:
+                return "REFLECT";
+            default:
+                return "DEFAULT";
+        }
     }
 }
