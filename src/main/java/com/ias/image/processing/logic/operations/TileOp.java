@@ -1,9 +1,9 @@
 package com.ias.image.processing.logic.operations;
-
+import java.io.Serializable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class TileOp implements ImageOperation {
+public class TileOp implements ImageOperation, Serializable {
     private final int countX;
     private final int countY;
     private final int spacingX;

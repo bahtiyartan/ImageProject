@@ -3,6 +3,8 @@ package com.ias.image.processing.logic;
 import com.ias.image.processing.logic.operations.ImageOperation;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.io.*;
+import javax.imageio.ImageIO;
 
 public class ImageController {
     private ImageModel model;
@@ -17,6 +19,7 @@ public class ImageController {
     }
 
     public void loadImage(BufferedImage img) {
+        model.getOperations().clear();
         model.setOriginalImage(img);
         processImage();
     }
@@ -71,6 +74,29 @@ public class ImageController {
         model.setCurrentImage(result);
 
         if (updateViewCallback != null) updateViewCallback.run();
+    }
+
+    public void saveProject(File file) throws IOException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(model.getOriginalImage(), "png", baos);
+
+        ProjectData data = new ProjectData(baos.toByteArray(), model.getOperations());
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+            oos.writeObject(data);
+        }
+    }
+
+    public void loadProject(File file) throws Exception{
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            ProjectData data = (ProjectData) ois.readObject();
+
+            BufferedImage img = ImageIO.read(new ByteArrayInputStream(data.getImageData()));
+            model.setOriginalImage(img);
+
+            model.getOperations().clear();
+            model.getOperations().addAll(data.getOperations());
+            processImage();
+        }
     }
 
     public ImageModel getModel() { return model; }

@@ -2,11 +2,12 @@ package com.ias.image.processing.logic.operations;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 
-public class RotateOp implements ImageOperation {
+public class RotateOp implements ImageOperation, Serializable {
     private final double angle;
-    private final Object interpolationHint;
     private final String hintName;
+    private transient Object interpolationHint;
 
 
     public RotateOp(double angle, Object interpolationHint, String hintName) {
@@ -34,8 +35,9 @@ public class RotateOp implements ImageOperation {
         BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = rotated.createGraphics();
 
+        Object finalHint = (interpolationHint != null) ? interpolationHint : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolationHint);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, finalHint);
 
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

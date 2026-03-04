@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class MainFrame extends JFrame {
 
@@ -19,7 +20,6 @@ public class MainFrame extends JFrame {
     private Point startPoint;
     private Point currentPoint;
     private boolean isDragging = false;
-
     private double currentScale = 1.0;
 
     public MainFrame(ImageController controller) {
@@ -30,6 +30,39 @@ public class MainFrame extends JFrame {
         setSize(1200, 800);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+
+        JButton loadBtn = new JButton("Select Image File");
+        loadBtn.setPreferredSize(new Dimension(0, 40));
+        loadBtn.addActionListener(e -> {
+            JFileChooser jfc = new JFileChooser();
+            if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    BufferedImage img = ImageIO.read(jfc.getSelectedFile());
+                    controller.loadImage(img);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+                }
+            }
+        });
+        add(loadBtn, BorderLayout.NORTH);
+
+        JPanel leftContainer = new JPanel(new BorderLayout());
+
+        JPanel projectButtonsPanel = new JPanel(new GridLayout(1, 2, 2, 2));
+        JButton saveProjBtn = new JButton("Save Project");
+        JButton loadProjBtn = new JButton("Open Project");
+
+        saveProjBtn.setFont(new Font("Arial", Font.PLAIN, 11));
+        loadProjBtn.setFont(new Font("Arial", Font.PLAIN, 11));
+
+        projectButtonsPanel.add(saveProjBtn);
+        projectButtonsPanel.add(loadProjBtn);
+
+        sidebar = new Sidebar(controller);
+        leftContainer.add(projectButtonsPanel, BorderLayout.NORTH);
+        leftContainer.add(sidebar, BorderLayout.CENTER);
+
+        add(leftContainer, BorderLayout.WEST);
 
         display = new JLabel("", SwingConstants.CENTER) {
             @Override
@@ -52,28 +85,34 @@ public class MainFrame extends JFrame {
             }
         };
 
-        sidebar = new Sidebar(controller);
-        add(sidebar, BorderLayout.WEST);
-
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setBackground(Color.LIGHT_GRAY);
         centerPanel.add(display, BorderLayout.CENTER);
         add(centerPanel, BorderLayout.CENTER);
 
-        JButton loadBtn = new JButton("Select Image File");
-        loadBtn.setMargin(new Insets(10, 10, 10, 10));
-        loadBtn.addActionListener(e -> {
+        saveProjBtn.addActionListener(e -> {
             JFileChooser jfc = new JFileChooser();
-            if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            if (jfc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
-                    BufferedImage img = ImageIO.read(jfc.getSelectedFile());
-                    controller.loadImage(img);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+                    controller.saveProject(jfc.getSelectedFile());
+                    JOptionPane.showMessageDialog(this, "Project Saved!");
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Save Error: " + ex.getMessage());
                 }
             }
         });
-        add(loadBtn, BorderLayout.NORTH);
+
+        loadProjBtn.addActionListener(e -> {
+            JFileChooser jfc = new JFileChooser();
+            if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    controller.loadProject(jfc.getSelectedFile());
+                    JOptionPane.showMessageDialog(this, "Project Loaded!");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Load Error: " + ex.getMessage());
+                }
+            }
+        });
 
         setupMouseListeners();
     }
@@ -87,40 +126,31 @@ public class MainFrame extends JFrame {
                     isDragging = true;
                 }
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (!isDragging || !controller.isCropModeActive()) return;
-
                 isDragging = false;
                 BufferedImage realImg = controller.getModel().getCurrentImage();
                 if (realImg == null || startPoint == null) return;
-
                 Icon icon = display.getIcon();
                 if (icon == null) return;
-
                 int iconW = icon.getIconWidth();
                 int iconH = icon.getIconHeight();
-
                 int offsetX = (display.getWidth() - iconW) / 2;
                 int offsetY = (display.getHeight() - iconH) / 2;
 
                 Point endPoint = e.getPoint();
-
                 int x = (int) ((Math.min(startPoint.x, endPoint.x) - offsetX) / currentScale);
                 int y = (int) ((Math.min(startPoint.y, endPoint.y) - offsetY) / currentScale);
                 int w = (int) (Math.abs(startPoint.x - endPoint.x) / currentScale);
                 int h = (int) (Math.abs(startPoint.y - endPoint.y) / currentScale);
-
                 if (w > 5 && h > 5) {
                     controller.addOperation(new CropOp(x, y, w, h));
                     controller.setCropModeActive(false);
                 }
-
                 display.repaint();
             }
         });
-
         display.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -137,7 +167,6 @@ public class MainFrame extends JFrame {
         if (currentImg != null) {
             display.setIcon(getScaledImageIcon(currentImg));
             display.setText("");
-
             display.setCursor(new Cursor(controller.isCropModeActive() ? Cursor.CROSSHAIR_CURSOR : Cursor.DEFAULT_CURSOR));
         }
         sidebar.updateList();
@@ -148,21 +177,15 @@ public class MainFrame extends JFrame {
     private ImageIcon getScaledImageIcon(BufferedImage srcImg) {
         int maxWidth = display.getParent().getWidth();
         int maxHeight = display.getParent().getHeight();
-
         if (maxWidth <= 50 || maxHeight <= 50) return new ImageIcon(srcImg);
-
         int srcW = srcImg.getWidth();
         int srcH = srcImg.getHeight();
-
         double widthRatio = (double) maxWidth / srcW;
         double heightRatio = (double) maxHeight / srcH;
         currentScale = Math.min(widthRatio, heightRatio);
-
         if (currentScale > 1.0) currentScale = 1.0;
-
         int newW = (int) (srcW * currentScale);
         int newH = (int) (srcH * currentScale);
-
         Image scaledImg = srcImg.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImg);
     }
