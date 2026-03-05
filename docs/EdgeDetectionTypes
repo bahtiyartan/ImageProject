@@ -1,0 +1,188 @@
+## SOBEL EDGE DETECTION
+
+It is one of the edge detection algorithms. It reveals the boundaries of objects by finding sudden changes (gradients) in the color/brightness intensity of pixels in the image.
+Sobel moves two small 3x3 matrices (kernels) over the image.
+
+The result is an image where the outlines of objects are highlighted, while other areas remain black.
+
+### What is its Purpose:
+
+- **Identifying Object Boundaries:** To reveal the main shapes in the image.
+- **Data Reduction:** Instead of millions of colors in an image, keeping only the form (skeleton) of the objects makes it easier for the computer to understand the image.
+- **Feature Extraction:** To identify characteristic lines in the image for artificial intelligence models.
+
+### Where and in Which Fields is it Used?
+
+1. **Autonomous Vehicles:** To detect the boundaries of road lanes and traffic signs.
+2. **Medical Imaging:** To highlight the boundaries of tumors or organs in X-ray or MRI results.
+3. **Industrial Robots:** To recognize the shape of parts on a factory assembly line and grasp them at the correct location.
+4. **OCR (Open Text Reading):** To identify the edges of letters on paper and facilitate character recognition.
+5. **Security Systems:** To capture the silhouette of a moving object.
+
+### ADVANTAGES
+
+**Fast**: Mathematically simple, works even with real-time videos.
+**Provides Direction Information:** Tells whether the edge is horizontal or vertical.
+**Slight Blur Effect:** Thanks to its internal structure, it slightly corrects the image and softens imperfections.
+
+### DISADVANTAGES
+
+**Sensitive to Noise:** If there is noise in the image, it can also perceive it as an edge.
+
+**Thick Edges:** Instead of thin lines like the Canny algorithm, it produces slightly thicker and coarser lines.
+**Accuracy:** It may miss some edges in very complex or low-contrast images.
+
+### PARAMETERS:
+
+Imgproc.Sobel (src, dst, ddepth, dx, dy, ksize, scale, delta, borderType)
+
+Their meanings in order:
+
+- **src:** original image source (Sobel generally gives the best results on grayscale images. Therefore, it is recommended to convert the image to grayscale first.)
+- **dst**: This is the new image file where the borders are drawn after the process is complete.
+- **ddepth (output depth):** Determines the data type in which the image pixels will be stored. 16 and 64 bits are most commonly used, but you must convert it back to 8 bits for it to be displayed on the screen.
+- **dx, dy:** Finds the changes in the horizontal and vertical directions.
+- **ksize:** The size of the Sobel matrix (must be an odd number). As the number increases, the borders appear thicker, but details decrease and noise increases. The most commonly used value is 3. - Scale: Used to increase the brightness of the edges. - Delta: Used if you want the result not to be completely black, but to make the whole image slightly more gray. - BorderType
+
+Only ksize (border thickness) and direction (dx-dy) will be sufficient. The others are generally technical background.
+
+## CANNY EDGE DETECTION
+
+Edge Detection is a popular edge detection algorithm. The first step in edge detection, which is sensitive to noise in the image, is to remove noise using a 5x5 Gaussian filter.
+
+After obtaining the slope magnitude and direction, a full scan of the image is performed to remove unwanted pixels that do not form an edge. For this, each pixel is checked for a local maximum in its neighborhood in the direction of the slope.
+
+### Hysteresis Thresholding
+
+This stage determines which edges are truly edges and which are not. For this, we need two threshold values: minVal and maxVal. All edges with a density gradient greater than maxVal are definitely edges, and those lower than minVal are definitely not edges, so they are eliminated. Those falling between these two thresholds are classified as edges or non-edges according to their connections. As a result, we obtain distinct edges in the image.
+
+Function used: [cv.Canny](https://docs.opencv.org/3.4/dd/d1a/group__imgproc__feature.html#ga04723e007ed888ddf11d9ba04e2232de) (image, edges, threshold1, threshold2, apertureSize = 3, L2gradient = false)
+
+It's not a single-stage operator like Sobel, but a multi-stage process. It should only create a single thin line for an edge, not a thick one like in Sobel.
+
+### STAGES
+
+1. Cleans up minor pixel errors using Gaussian blur (noise reduction).
+2. Calculates the gradient. It takes the horizontal and vertical derivatives of the image using Sobel.
+3. Non-Maximum Suppression: Only retains the local maximum pixels of the gradient. Converts thick edges into 1-pixel lines.
+4. Performs hysteresis (double thresholding).
+5. Keeps edges that are strongly connected and removes others.
+
+### WHERE IT IS USED
+
+- **Autonomous Driving:** Lane tracking and road boundary determination (because it provides very clear lines).
+- **Face and Object Recognition:** To extract the exact silhouette of an object.
+- **Medical Analysis:** Identifying vascular or bone structures with fine lines in MR images. - **QR Code Readers:** Precisely identifying the frame of the code.
+
+### ADVANTAGES
+
+**Thin Edges:** The result is always 1 pixel thick and very sharp.
+
+**Noise Filtering:** It gives a cleaner result because it has a noise removal step within itself.
+
+**Continuity:** Thanks to its ability to connect the edges, there are fewer broken lines.
+
+### DISADVANTAGES
+
+**Complexity:** According to Sobel, it consumes more power than the processor (it is slower).
+**Parameter Sensitivity:** It is difficult to correctly set the two threshold values (low/high threshold).
+
+**Time:** It can sometimes create a load in real-time systems (if very high FPS is required).
+
+## LAPLACE OPERATOR
+
+Unlike Sobel and Canny, the Laplacian is a second derivative operator. Its difference is that it measures not only the change in brightness but also the change in speed.
+
+### **PRINCIPAL PURPOSES**
+
+1. Edge detection (isotropic): Detects edges in all directions simultaneously.
+2. Sharpening: Laplacian isolates the details (high-frequency components) of an image, making the picture appear sharper.
+3. Zero-Crossing: Used to find the exact center of edges.
+
+### **WHERE IT IS USED**
+
+- **Image Sharpening:** In "Unsharp Masking" techniques to make blurry photos clearer.
+- **Object Detection:** To extract the outlines and fine details of an object.
+- **Astronomy and Satellite Images:** To highlight fine craters/cracks in planetary or terrestrial photographs. - **Medical Imaging:** To delineate the boundaries of very fine and complex structures, such as blood vessels.
+
+### AVANTAGES
+
+**Direction Independent:** Finds edges in all directions with a single operation (in Sobel you have to do X and Y separately).
+**Fine Details:** More precise than Sobel in capturing very fine lines.
+**Sharpening Capability:** Can be used not only for edge finding but also to improve image quality.
+
+### DISADVANTAGES
+
+**Extremely Sensitive to Noise:** Because it uses the second derivative, it perceives even the slightest "noise" in the image as a huge edge.
+
+**Difficulty in Use:** When used alone, the result is usually very "dirty"; Gaussian Blur must be applied beforehand.
+
+**Double Line Problem:** Sometimes, instead of a single line, it can create two thin lines side by side at the edges.
+
+USAGE
+
+Imgproc.Laplacian(src, dst, ddepth, ksize, scale, delta, borderType)
+
+- If the user says **"Sharpen the image"**: You should use **Laplacian**.
+- If the user says **"Analyze edges according to their orientation (horizontal/vertical)"**: You should use **Sobel**.
+- If the user says **"Give me a clean, thin, noise-free edge map"**: You should use **Canny**.
+
+Because Laplacian is very sensitive to noise, it is usually not applied directly. First, the image is softened with **Gaussian Blur**, then **Laplacian** is applied. This is called a **LoG** filter. This method is ideal for preserving edges while suppressing noise.
+
+## PREWITT OPERATOR
+
+It can be considered an "unweighted" version of Sobel. It finds object boundaries by calculating density changes, or gradients.
+
+It finds sharp brightness changes in the image.
+
+It analyzes the image according to radians, or slope directions.
+
+It reveals object outlines.
+
+DIFFERENCES FROM SOBEL:
+
+In Sobel, medium matrices are more weighted. In PreWitt, all values are equal. It is mathematically simpler but more sensitive to noise.
+
+### WHERE IT IS USED
+
+- **Simple Edge Detection:** In simple applications that do not require very high processing power.
+- **Biomedical Imaging:** For quickly scanning cell or tissue boundaries.
+- **Image Segmentation:** In the preprocessing stage before dividing an image into different parts.
+- **Educational Purposes:** To understand the basics of image processing and the logic of convolutional matrices.
+
+### AVANTAGES
+
+**Very Fast:** Its computational load is very low because it has an even simpler structure than Sobel's.
+**Horizontal/Vertical Distinction:** It can distinguish the orientation of edges very clearly.
+**Easy to Implement:** It is one of the easiest algorithms to implement at the hardware level (FPGA, etc.).
+
+### DISAVANTAGES
+
+**Sensitive to Noise:** It lacks the subtle "smoothing" effect that Sobel has.
+
+**Less Accurate:** It may not be as successful as Sobel or Canny in identifying edge pixels.
+
+**Lags Behind Modern Standards:** Sobel or Canny are generally preferred today.
+
+### PARAMETERS
+
+There is no direct `imgproc.Prewitt()` method like `sobel` and `canny`. For this, the general filtering method `imgproc.filter2D()` is used.
+
+`imgproc.filter2D(src, dst, ddepth, kernel)` → kernel is generally used. You create a matrix manually (3x3). If the size increases, the edges become thicker, but it becomes somewhat more resistant to noise. Only x and y directions are available.
+
+If the image is not very clear and fast, `prewitt` is not chosen; instead, `sobel` and `canny` provide more reliable results.
+
+## LOGICAL USAGE ORDER
+
+1. **CANNY:** Removes noise, finds edges, refines thick lines, and connects broken parts. Excellent for creating the exact silhouette of objects. Very good for object counting, measurement, and shape recognition. EDGE DETECTION
+2. **LAPLACIAN**: For sharpening rather than finding edges. Removes fine textures and dust from the image. SHARPENING
+3. **SOBEL**: Calculates light changes in the image. Best for those who only want to see horizontal and vertical lines in the image, for example, counting building floors or columns. Faster than Canny. FOR X AND Y DIRECTIONS
+4. **PREWITT**: Similar to Sobel but performs cruder calculations and can be used with simple equipment.
+
+**In short:**
+
+Sobel calculates density changes in the image separately on the horizontal and vertical axes. It is resistant to noise but may find edges a little thick (1st order derivative).
+Laplacian is very good at finding the exact center of edges but is very sensitive to noise. It is usually recommended to apply a Gaussian Blur first.
+
+Canny both cleans noise and successfully captures even the finest edges.
+(Since Sobel will be used in the project, PreWitt will not be needed.)

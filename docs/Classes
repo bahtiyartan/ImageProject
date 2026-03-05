@@ -1,0 +1,39 @@
+### GAUSSIAN BLUR CLASS
+
+Gaussian blur is one of the most common techniques used to smooth an image and reduce noise.
+
+Gaussian Blur recalculates the value of each pixel based on the weighted average of its neighboring pixels. These weights are determined according to the "Gaussian Distribution" (bell curve).
+
+- **kernelSize**: This is the size of the area (matrix) where blurring will occur (3x3, 5x5). The larger it is, the more the image is blurred.
+- **sigmaX**: This is the standard deviation of the Gaussian kernel. It determines the amount of "spread" of the blur. If 0 is given, it is automatically calculated according to the kernel size.
+- **borderType**: Determines how the pixels at the edges of the image are processed (because edge pixels do not have a complete list of neighbors).
+- BORDER_CONSTANT: Add black/constant color to the edges.
+- BORDER_REPLICATE: Mirrors/extends edge pixels outwards. - BORDER_DEFAULT: A slightly smarter and improved version of the BORDER_REFLECT method. It uses the edge of the image like a mirror but does not repeat the outermost pixel.
+
+### ROTATE CLASS:
+
+For now, we are only adding the Interpolation parameter to the **Rotate** operation.
+
+This parameter directly affects image quality by determining how pixels are recalculated when the image is rotated.
+
+Here are the interpolation options we will use and their meanings:
+
+- **Bicubic (Highest Quality):** Takes into account the surrounding 16 pixels. Provides the smoothest and highest quality result, but requires more processing power.
+- **Bilinear (Medium Quality):** Takes into account the surrounding 4 pixels. It is a balance between speed and quality.
+- **Nearest Neighbor (Fastest):** Looks at the closest single pixel. It is fast, but may cause aliasing at the edges after rotation.
+
+### PROJECT-BASED SAVING:
+
+We will create a special **project file** format containing the image itself and your Workflow History. This structure will allow you to continue from where you left off when you close and reopen the application.
+
+### Making Operations Serializable
+
+**1.** In Java, we use the `Serializable` interface to write objects to a file and then read them back. All operation classes and the `ImageOperation` interface must support this interface.
+
+**2. Project Data Structure (ProjectData)**
+
+We create a new class that packages the image and the operation list into a single package. Since `BufferedImage` cannot be saved directly, we will store it by converting it to a `byte[]` array.
+
+The main reason for using the `Serializable` interface is to "freeze" the current parameters of objects, write them to a file, and then revive the objects from that file in their original state. Normally, objects in Java reside in the computer's **RAM** (temporary memory). These objects disappear the moment you close the application.
+
+We combined the original image (`byte[]`) and the operation list (`List<ImageOperation>`) into a single `ProjectData` object. This class acted as a "box".
