@@ -4,56 +4,68 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class RotateOp implements ImageOperation, Serializable {
-    private final double angle;
-    private final String hintName;
-    private transient Object interpolationHint;
 
+	private final double angle;
+	private final String hintName;
+	private transient Object interpolationHint;
 
-    public RotateOp(double angle, Object interpolationHint, String hintName) {
-        this.angle = angle;
-        this.interpolationHint = interpolationHint;
-        this.hintName = hintName;
-    }
-    public double getAngle(){ return angle;}
+	public RotateOp(double angle, Object interpolationHint, String hintName) {
+		this.angle = angle;
+		this.interpolationHint = interpolationHint;
+		this.hintName = hintName;
+	}
 
-    public Object getInterpolationHint() {return interpolationHint;}
-    public String getHintName() {    return hintName;
-    }
+	public double getAngle() {
+		return angle;
+	}
 
-    @Override
-    public BufferedImage apply(BufferedImage img) {
-        double radians = Math.toRadians(angle);
-        double sin = Math.abs(Math.sin(radians));
-        double cos = Math.abs(Math.cos(radians));
-        int w = img.getWidth();
-        int h = img.getHeight();
+	public Object getInterpolationHint() {
+		return interpolationHint;
+	}
 
-        int newWidth = (int) Math.floor(w * cos + h * sin);
-        int newHeight = (int) Math.floor(h * cos + w * sin);
+	public String getHintName() {
+		return hintName;
+	}
 
-        BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = rotated.createGraphics();
+	@Override
+	public BufferedImage apply(BufferedImage img) {
+		double radians = Math.toRadians(angle);
+		double sin = Math.abs(Math.sin(radians));
+		double cos = Math.abs(Math.cos(radians));
+		int w = img.getWidth();
+		int h = img.getHeight();
 
-        Object finalHint = (interpolationHint != null) ? interpolationHint : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+		int newWidth = (int) Math.floor(w * cos + h * sin);
+		int newHeight = (int) Math.floor(h * cos + w * sin);
 
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, finalHint);
+		BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = rotated.createGraphics();
 
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		Object finalHint = (interpolationHint != null) ? interpolationHint : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 
+		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, finalHint);
 
-        g2d.translate((newWidth - w) / 2, (newHeight - h) / 2);
-        g2d.rotate(radians, w / 2.0, h / 2.0);
-        g2d.drawImage(img, 0, 0, null);
+		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2d.dispose();
+		g2d.translate((newWidth - w) / 2, (newHeight - h) / 2);
+		g2d.rotate(radians, w / 2.0, h / 2.0);
+		g2d.drawImage(img, 0, 0, null);
 
-        return rotated;
-    }
+		g2d.dispose();
 
-    @Override
-    public String getOperationName() {
-        return "Rotate (" + angle + "°, Quality: " + hintName + ")";
-    }
+		return rotated;
+	}
+
+	@Override
+	public String getOperationName() {
+		return "Rotate (" + angle + "°, Quality: " + hintName + ")";
+	}
+
+	@Override
+	public OperationType getOperationType() {
+		return OperationType.ROTATE;
+	}
 }

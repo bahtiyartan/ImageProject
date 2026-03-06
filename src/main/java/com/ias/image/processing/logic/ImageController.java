@@ -7,97 +7,105 @@ import java.io.*;
 import javax.imageio.ImageIO;
 
 public class ImageController {
-    private ImageModel model;
-    private Runnable updateViewCallback;
 
-    public ImageController(ImageModel model) {
-        this.model = model;
-    }
+	private ImageModel model;
+	private Runnable updateViewCallback;
 
-    public void setUpdateViewCallback(Runnable callback) {
-        this.updateViewCallback = callback;
-    }
+	public ImageController(ImageModel model) {
+		this.model = model;
+	}
 
-    public void loadImage(BufferedImage img) {
-        model.getOperations().clear();
-        model.setOriginalImage(img);
-        processImage();
-    }
+	public void setUpdateViewCallback(Runnable callback) {
+		this.updateViewCallback = callback;
+	}
 
-    public void addOperation(ImageOperation op) {
-        model.addOperation(op);
-        processImage();
-    }
+	public void loadImage(BufferedImage img) {
+		model.getOperations().clear();
+		model.setOriginalImage(img);
+		processImage();
+	}
 
-    private boolean cropModeActive = false;
+	public void addOperation(ImageOperation op) {
+		model.addOperation(op);
+		processImage();
+	}
 
-    public void setCropModeActive(boolean active) {
-        this.cropModeActive = active;
-        if (updateViewCallback != null) updateViewCallback.run();
-    }
+	private boolean cropModeActive = false;
 
-    public boolean isCropModeActive() {
-        return cropModeActive;
-    }
-    public void undo() {
-        List<ImageOperation> ops = model.getOperations();
-        if (!ops.isEmpty()) {
-            ops.remove(ops.size() - 1);
-            processImage();
+	public void setCropModeActive(boolean active) {
+		this.cropModeActive = active;
+		if (updateViewCallback != null)
+			updateViewCallback.run();
+	}
 
-        } else {
-            System.out.println("There are no more actions to undo.");
-        }
-    }
-    public void updateOperation(int index, ImageOperation newOp) {
-        model.getOperations().set(index, newOp);
-        processImage();
-    }
+	public boolean isCropModeActive() {
+		return cropModeActive;
+	}
 
-    public void removeOperation(int index) {
-        model.getOperations().remove(index);
-        processImage();
-    }
+	public void undo() {
+		List<ImageOperation> ops = model.getOperations();
+		if (!ops.isEmpty()) {
+			ops.remove(ops.size() - 1);
+			processImage();
 
-    private void processImage() {
-        if (model.getOriginalImage() == null) return;
+		} else {
+			System.out.println("There are no more actions to undo.");
+		}
+	}
 
-        BufferedImage result = model.getOriginalImage();
-        try {
-            for (ImageOperation op : model.getOperations()) {
-                result = op.apply(result);
-            }
-        } catch (Exception e) {
-            System.err.println("An error occurred while processing the image: " + e.getMessage());
-            e.printStackTrace();
-        }
-        model.setCurrentImage(result);
+	public void updateOperation(int index, ImageOperation newOp) {
+		model.getOperations().set(index, newOp);
+		processImage();
+	}
 
-        if (updateViewCallback != null) updateViewCallback.run();
-    }
+	public void removeOperation(int index) {
+		model.getOperations().remove(index);
+		processImage();
+	}
 
-    public void saveProject(File file) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(model.getOriginalImage(), "png", baos);
+	private void processImage() {
+		if (model.getOriginalImage() == null)
+			return;
 
-        ProjectData data = new ProjectData(baos.toByteArray(), model.getOperations());
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-            oos.writeObject(data);
-        }
-    }
+		BufferedImage result = model.getOriginalImage();
+		try {
+			for (ImageOperation op : model.getOperations()) {
+				result = op.apply(result);
+			}
+		} catch (Exception e) {
+			System.err.println("An error occurred while processing the image: " + e.getMessage());
+			e.printStackTrace();
+		}
+		model.setCurrentImage(result);
 
-    public void loadProject(File file) throws Exception{
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            ProjectData data = (ProjectData) ois.readObject();
+		if (updateViewCallback != null)
+			updateViewCallback.run();
+	}
 
-            BufferedImage img = ImageIO.read(new ByteArrayInputStream(data.getImageData()));
-            model.setOriginalImage(img);
+	public void saveProject(File file) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(model.getOriginalImage(), "png", baos);
 
-            model.getOperations().clear();
-            model.getOperations().addAll(data.getOperations());
-            processImage();
-        }
-    }
+		ProjectData data = new ProjectData(baos.toByteArray(), model.getOperations());
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+			oos.writeObject(data);
+		}
+	}
 
-    public ImageModel getModel() { return model; }
+	public void loadProject(File file) throws Exception {
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+			ProjectData data = (ProjectData) ois.readObject();
+
+			BufferedImage img = ImageIO.read(new ByteArrayInputStream(data.getImageData()));
+			model.setOriginalImage(img);
+
+			model.getOperations().clear();
+			model.getOperations().addAll(data.getOperations());
+			processImage();
+		}
+	}
+
+	public ImageModel getModel() {
+		return model;
+	}
 }
