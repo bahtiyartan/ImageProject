@@ -7,6 +7,10 @@ public interface ImageOperation extends java.io.Serializable {
 	public BufferedImage apply(BufferedImage input);
 
 	public String getOperationName();
-	
+
 	public OperationType getOperationType();
+
+	default String getClassName() {
+		return this.getClass().getName();
+	}
 }

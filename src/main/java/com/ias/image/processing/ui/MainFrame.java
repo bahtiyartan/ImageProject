@@ -110,7 +110,7 @@ public class MainFrame extends JFrame {
 			if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
 					controller.loadProject(jfc.getSelectedFile());
-					JOptionPane.showMessageDialog(this, "Project Loaded!");
+					sidebar.updateList();
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(this, "Load Error: " + ex.getMessage());
 				}
@@ -169,7 +169,7 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void refreshUI() {
+	public void refreshUI() {
 		BufferedImage currentImg = controller.getModel().getCurrentImage();
 		if (currentImg != null) {
 			display.setIcon(getScaledImageIcon(currentImg));
