@@ -150,20 +150,14 @@ public class ImageController {
 			String type = extractField(opJson, "operationType");
 			ImageOperation op = null;
 
-			switch (type) {
-				case "ROTATE":
-					op = RotateOp.fromJson(opJson);
-					break;
-				case "CROP":
-					op = CropOp.fromJson(opJson);
-					break;
-				case "GAUSSIANBLUR":
-					op = GaussianBlurOp.fromJson(opJson);
-					break;
-				case "TILE":
-					op = TileOp.fromJson(opJson);
-					break;
+			int id = Integer.parseInt(extractField(opJson, "operationId"));
+			switch (id) {
+				case 1: op = CropOp.fromJson(opJson); break;
+				case 2: op = RotateOp.fromJson(opJson); break;
+				case 3: op = TileOp.fromJson(opJson); break;
+				case 4: op = GaussianBlurOp.fromJson(opJson); break;
 			}
+
 			if (op != null) model.addOperation(op);
 		}
 		processImage();

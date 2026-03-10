@@ -104,7 +104,6 @@ public class GaussianBlurOp implements ImageOperation {
 		StringBuilder json = new StringBuilder();
 
 		json.append("{\n");
-		json.append("\"operationType\": \"").append(getOperationType()).append("\",\n");
 		json.append("\"operationId\": ").append(getOperationType().getOperationId()).append(",\n");
 		json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
 		json.append("\"params\": {\n");

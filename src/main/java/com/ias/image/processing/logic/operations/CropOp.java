@@ -38,7 +38,6 @@ public class CropOp implements ImageOperation {
 	public String toJson() {
 		StringBuilder json = new StringBuilder();
 		json.append("{\n");
-		json.append("\"operationType\": \"").append(getOperationType().name()).append("\",\n");
 		json.append("\"operationId\": ").append(getOperationType().getOperationId()).append(",\n");
 		json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
 		json.append("\"params\": {\n");

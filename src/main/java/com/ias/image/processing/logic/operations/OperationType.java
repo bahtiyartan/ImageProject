@@ -7,15 +7,21 @@ public enum OperationType {
 	TILE(3), //
 	GAUSSIANBLUR(4);//
 
-	private int OperationId;
+	private  final int OperationId;
 
-	private OperationType(int id) {
-		this.OperationId = id;
-	}
+	private OperationType(int id) {this.OperationId = id;}
 
 	public int getOperationId() {
 		return this.OperationId;
 	}
 
+	public static OperationType fromId(int id) {
+		for (OperationType type : values()) {
+			if (type.getOperationId() == id) {
+				return type;
+			}
+		}
+		return null;
+	}
 }
 
