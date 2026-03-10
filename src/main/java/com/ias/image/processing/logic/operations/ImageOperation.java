@@ -13,3 +13,4 @@ public interface ImageOperation extends java.io.Serializable {
 	public String toJson();
 }
 
+

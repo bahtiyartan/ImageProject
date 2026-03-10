@@ -104,3 +104,4 @@ public class TileOp implements ImageOperation, Serializable {
 		return value.replace("\"", "");
 	}
 }
+

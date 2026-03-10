@@ -100,3 +100,4 @@ public class RotateOp implements ImageOperation, Serializable {
 		return value.replace("\"", "");
 	}
 }
+
