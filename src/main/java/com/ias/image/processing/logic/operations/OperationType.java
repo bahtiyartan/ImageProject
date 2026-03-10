@@ -13,8 +13,8 @@ public enum OperationType {
 		this.OperationId = id;
 	}
 
-	@SuppressWarnings("unused")
-	private int getOperationId() {
+	public int getOperationId() {
 		return this.OperationId;
 	}
+
 }

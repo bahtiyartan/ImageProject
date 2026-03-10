@@ -82,19 +82,56 @@ public class GaussianBlurOp implements ImageOperation {
 
 	private String getBorderName(int type) {
 		switch (type) {
-		case org.opencv.core.Core.BORDER_CONSTANT:
-			return "CONSTANT";
-		case org.opencv.core.Core.BORDER_REPLICATE:
-			return "REPLICATE";
-		case org.opencv.core.Core.BORDER_REFLECT:
-			return "REFLECT";
-		default:
-			return "DEFAULT";
+			case org.opencv.core.Core.BORDER_CONSTANT:
+				return "CONSTANT";
+			case org.opencv.core.Core.BORDER_REPLICATE:
+				return "REPLICATE";
+			case org.opencv.core.Core.BORDER_REFLECT:
+				return "REFLECT";
+			default:
+				return "DEFAULT";
 		}
 	}
 
 	@Override
 	public OperationType getOperationType() {
 		return OperationType.GAUSSIANBLUR;
+	}
+
+	@Override
+	public String toJson() {
+
+		StringBuilder json = new StringBuilder();
+
+		json.append("{\n");
+		json.append("\"operationType\": \"").append(getOperationType()).append("\",\n");
+		json.append("\"operationId\": ").append(getOperationType().getOperationId()).append(",\n");
+		json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
+		json.append("\"params\": {\n");
+		json.append("\"kernelSize\": ").append(kernelSize).append(",\n");
+		json.append("\"sigmaX\": ").append(sigmaX).append(",\n");
+		json.append("\"borderType\": ").append(borderType).append("\n");
+		json.append("}\n");
+		json.append("}");
+
+		return json.toString();
+	}
+
+	public static GaussianBlurOp fromJson(String json) {
+		int kernelSize = Integer.parseInt(extractField(json, "kernelSize"));
+		double sigmaX = Double.parseDouble(extractField(json, "sigmaX"));
+		int borderType = Integer.parseInt(extractField(json, "borderType"));
+		return new GaussianBlurOp(kernelSize, sigmaX, borderType);
+	}
+
+	private static String extractField(String json, String field) {
+		int idx = json.indexOf("\"" + field + "\"");
+		if (idx == -1) return null;
+		int colon = json.indexOf(":", idx);
+		int comma = json.indexOf(",", colon);
+		int endBrace = json.indexOf("}", colon);
+		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+		String value = json.substring(colon + 1, end).trim();
+		return value.replace("\"", "");
 	}
 }

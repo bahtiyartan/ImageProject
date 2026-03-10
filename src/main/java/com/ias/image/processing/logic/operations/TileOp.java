@@ -67,4 +67,40 @@ public class TileOp implements ImageOperation, Serializable {
 	public OperationType getOperationType() {
 		return OperationType.TILE;
 	}
+
+	@Override
+	public String toJson() {
+		StringBuilder json = new StringBuilder();
+		json.append("{\n");
+		json.append("\"operationType\": \"").append(getOperationType().name()).append("\",\n");
+		json.append("\"operationId\": ").append(getOperationType().getOperationId()).append(",\n");
+		json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
+		json.append("\"params\": {\n");
+		json.append("\"countX\": ").append(countX).append(",\n");
+		json.append("\"countY\": ").append(countY).append(",\n");
+		json.append("\"spacingX\": ").append(spacingX).append(",\n");
+		json.append("\"spacingY\": ").append(spacingY).append("\n");
+		json.append("}\n");
+		json.append("}");
+		return json.toString();
+	}
+
+	public static TileOp fromJson(String json) {
+		int countX = Integer.parseInt(extractField(json, "countX"));
+		int countY = Integer.parseInt(extractField(json, "countY"));
+		int spacingX = Integer.parseInt(extractField(json, "spacingX"));
+		int spacingY = Integer.parseInt(extractField(json, "spacingY"));
+		return new TileOp(countX, countY, spacingX, spacingY);
+	}
+
+	private static String extractField(String json, String field) {
+		int idx = json.indexOf("\"" + field + "\"");
+		if (idx == -1) return null;
+		int colon = json.indexOf(":", idx);
+		int comma = json.indexOf(",", colon);
+		int endBrace = json.indexOf("}", colon);
+		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+		String value = json.substring(colon + 1, end).trim();
+		return value.replace("\"", "");
+	}
 }

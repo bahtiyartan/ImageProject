@@ -46,7 +46,6 @@ public class RotateOp implements ImageOperation, Serializable {
 		Object finalHint = (interpolationHint != null) ? interpolationHint : RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 
 		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, finalHint);
-
 		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -67,5 +66,37 @@ public class RotateOp implements ImageOperation, Serializable {
 	@Override
 	public OperationType getOperationType() {
 		return OperationType.ROTATE;
+	}
+
+	@Override
+	public String toJson() {
+		StringBuilder json = new StringBuilder();
+		json.append("{\n");
+		json.append("\"operationType\": \"").append(getOperationType().name()).append("\",\n");
+		json.append("\"operationId\": ").append(getOperationType().getOperationId()).append(",\n");
+		json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
+		json.append("\"params\": {\n");
+		json.append("\"angle\": ").append(angle).append(",\n");
+		json.append("\"hintName\": \"").append(hintName).append("\"\n");
+		json.append("}\n");
+		json.append("}");
+		return json.toString();
+	}
+
+	public static RotateOp fromJson(String json) {
+		double angle = Double.parseDouble(extractField(json, "angle"));
+		String hintName = extractField(json, "hintName");
+		return new RotateOp(angle, null, hintName);
+	}
+
+	private static String extractField(String json, String field) {
+		int idx = json.indexOf("\"" + field + "\"");
+		if (idx == -1) return null;
+		int colon = json.indexOf(":", idx);
+		int comma = json.indexOf(",", colon);
+		int endBrace = json.indexOf("}", colon);
+		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+		String value = json.substring(colon + 1, end).trim();
+		return value.replace("\"", "");
 	}
 }

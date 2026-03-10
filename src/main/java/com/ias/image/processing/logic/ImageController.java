@@ -1,15 +1,14 @@
 package com.ias.image.processing.logic;
 
 import com.ias.image.processing.logic.operations.ImageOperation;
-import com.ias.image.processing.logic.operations.ProjectData;
+import com.ias.image.processing.logic.operations.CropOp;
+import com.ias.image.processing.logic.operations.RotateOp;
+import com.ias.image.processing.logic.operations.GaussianBlurOp;
+import com.ias.image.processing.logic.operations.TileOp;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.io.*;
 import javax.imageio.ImageIO;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.*;
-import com.ias.image.processing.logic.operations.*;
 
 public class ImageController {
 
@@ -20,26 +19,20 @@ public class ImageController {
 		this.model = model;
 	}
 
-	private byte[] imageToBytes(BufferedImage img) throws IOException {
-		if (img == null) return null;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(img, "png", baos);
-		return baos.toByteArray();
-	}
+	private String buildJson() {
+		StringBuilder json = new StringBuilder();
+		json.append("{\n");
+		json.append("\"Operations\": [\n");
 
-	private BufferedImage bytesToImage(byte[] data) throws IOException {
-		if (data == null) return null;
-		return ImageIO.read(new ByteArrayInputStream(data));
-	}
-
-	private String convertToJson(ProjectData data) {
-		return new GsonBuilder().setPrettyPrinting().create().toJson(data);
-	}
-	private ProjectData parseJson(File file) throws Exception {
-		Gson gson = new Gson();
-		try (Reader reader = new FileReader(file)) {
-			return gson.fromJson(reader, ProjectData.class);
+		List<ImageOperation> ops = model.getOperations();
+		for (int i = 0; i < ops.size(); i++) {
+			json.append(ops.get(i).toJson());
+			if (i < ops.size() - 1) json.append(",");
+			json.append("\n");
 		}
+		json.append("]\n");
+		json.append("}");
+		return json.toString();
 	}
 
 	public void setUpdateViewCallback(Runnable callback) {
@@ -91,8 +84,7 @@ public class ImageController {
 	}
 
 	private void processImage() {
-		if (model.getOriginalImage() == null)
-			return;
+		if (model.getOriginalImage() == null) return;
 
 		BufferedImage result = model.getOriginalImage();
 		try {
@@ -110,52 +102,82 @@ public class ImageController {
 	}
 
 	public void saveProject(File file) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(model.getOriginalImage(), "png", baos);
-		ProjectData data = new ProjectData(baos.toByteArray(), model.getOperations());
+		File imageFile = new File(file.getParent(), file.getName() + "_image.png");
+		if (model.getOriginalImage() != null) {
+			ImageIO.write(model.getOriginalImage(), "png", imageFile);
+		}
 
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		try (Writer writer = new FileWriter(file)) {
-			writer.write(gson.toJson(data));
+		// Generate JSON
+		StringBuilder json = new StringBuilder();
+		json.append("{\n");
+		json.append("\" ImagePath\": \"").append(imageFile.getAbsolutePath()).append("\",\n");
+		json.append("\" operations\": [\n");
+
+		List<ImageOperation> ops = model.getOperations();
+		for (int i = 0; i < ops.size(); i++) {
+			json.append(ops.get(i).toJson());
+			if (i < ops.size() - 1) json.append(",");
+			json.append("\n");
+		}
+		json.append("]\n");
+		json.append("}");
+
+		// Write JSON to project file
+		try (FileWriter writer = new FileWriter(file)) {
+			writer.write(json.toString());
 		}
 	}
 
+
 	public void loadProject(File file) throws Exception {
-		try (Reader reader = new FileReader(file)) {
-			JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+		String content = new String(java.nio.file.Files.readAllBytes(file.toPath()));
+		model.getOperations().clear();
 
-			byte[] imageData = new Gson().fromJson(jsonObject.get("imageData"), byte[].class);
-			model.setOriginalImage(bytesToImage(imageData));
-
-			JsonArray opsArray = jsonObject.getAsJsonArray("operations");
-			model.getOperations().clear();
-
-			Gson gson = new Gson();
-			if (opsArray != null) {
-				for (JsonElement element : opsArray) {
-					JsonObject opObj = element.getAsJsonObject();
-
-					String typeStr = opObj.get("getOperationType") != null ?
-							opObj.get("getOperationType").getAsString() :
-							opObj.get("type") != null ? opObj.get("type").getAsString() : null;
-
-					ImageOperation op = null;
-
-					if (opObj.has("angle")) {
-						op = gson.fromJson(element, RotateOp.class);
-					} else if (opObj.has("x") && opObj.has("width")) {
-						op = gson.fromJson(element, CropOp.class);
-					} else if (opObj.has("kernelSize")) { // GaussianBlur
-						op = gson.fromJson(element, GaussianBlurOp.class);
-					} else if (opObj.has("countX")) { // TileOp
-						op = gson.fromJson(element, TileOp.class);
-					}
-
-					if (op != null) model.addOperation(op);
-				}
-			}
-			processImage();
+		String imagePath = extractField(content, "imagePath");
+		if (imagePath != null && !imagePath.isEmpty()) {
+			BufferedImage img = ImageIO.read(new File(imagePath));
+			model.setOriginalImage(img);
 		}
+		// Extracts operations from JSON
+		String opsStr = content.substring(content.indexOf("[") + 1, content.lastIndexOf("]"));
+		String[] opJsons = opsStr.split("\\},\\s*\\{");
+
+		for (String raw : opJsons) {
+			String opJson = raw.trim();
+			if (!opJson.startsWith("{")) opJson = "{" + opJson;
+			if (!opJson.endsWith("}")) opJson = opJson + "}";
+
+			String type = extractField(opJson, "operationType");
+			ImageOperation op = null;
+
+			switch (type) {
+				case "ROTATE":
+					op = RotateOp.fromJson(opJson);
+					break;
+				case "CROP":
+					op = CropOp.fromJson(opJson);
+					break;
+				case "GAUSSIANBLUR":
+					op = GaussianBlurOp.fromJson(opJson);
+					break;
+				case "TILE":
+					op = TileOp.fromJson(opJson);
+					break;
+			}
+			if (op != null) model.addOperation(op);
+		}
+		processImage();
+	}
+
+	private String extractField(String json, String field) {
+		int idx = json.indexOf("\"" + field + "\"");
+		if (idx == -1) return null;
+		int colon = json.indexOf(":", idx);
+		int comma = json.indexOf(",", colon);
+		int endBrace = json.indexOf("}", colon);
+		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+		String value = json.substring(colon + 1, end).trim();
+		return value.replace("\"", "");
 	}
 
 	public ImageModel getModel() {
