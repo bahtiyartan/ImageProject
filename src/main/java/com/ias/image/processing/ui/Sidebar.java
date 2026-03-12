@@ -26,7 +26,7 @@ public class Sidebar extends JPanel {
 		list.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-					boolean cellHasFocus) {
+														  boolean cellHasFocus) {
 				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 				if (value instanceof ImageOperation) {
 					setText(((ImageOperation) value).getOperationName());
@@ -116,7 +116,10 @@ public class Sidebar extends JPanel {
 		rotateItem.addActionListener(e -> showRotateDialog(null, -1));
 		JMenuItem tileItem = new JMenuItem("Tile (Grid)");
 		tileItem.addActionListener(e -> showTileDialog(null, -1));
+		JMenuItem histItem = new JMenuItem("Color Histogram");
+		histItem.addActionListener(e -> controller.addOperation(new ColorHistogramOp()));
 
+		menu.add(histItem);
 		menu.add(blurItem);
 		menu.add(cropItem);
 		menu.add(rotateItem);

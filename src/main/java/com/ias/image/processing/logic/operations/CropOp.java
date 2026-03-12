@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 @SuppressWarnings("serial")
 public class CropOp implements ImageOperation {
 
-	private int x, y, width, height;
+	private final int x, y, width, height;
 
 	public CropOp(int x, int y, int width, int height) {
 		this.x = x;
@@ -15,25 +15,49 @@ public class CropOp implements ImageOperation {
 	}
 
 	@Override
-	public BufferedImage apply(BufferedImage img) {
+	public DataType getInputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public DataType getOutputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public OperationResult apply(OperationResult input) {
+		if (input == null || !input.hasImage()) {
+			throw new IllegalArgumentException("Crop operation requires an IMAGE input");
+		}
+		BufferedImage img = input.getImageResult();
+
 		int actualX = Math.max(0, Math.min(x, img.getWidth() - 1));
 		int actualY = Math.max(0, Math.min(y, img.getHeight() - 1));
 		int w = Math.max(1, Math.min(width, img.getWidth() - actualX));
 		int h = Math.max(1, Math.min(height, img.getHeight() - actualY));
 
-		return img.getSubimage(actualX, actualY, w, h);
+		BufferedImage cropped = img.getSubimage(actualX, actualY, w, h);
+
+		String info = "Cropped area: " + width + "x" + height;
+		Double area = (double) width * height;
+
+		return new OperationResult(cropped, info, area, null);
+	}
+
+	@Override
+	public int getOperationId() {
+		return OperationType.CROP.getOperationId();
 	}
 
 	@Override
 	public String getOperationName() {
 		return "Crop [" + x + "," + y + " " + width + "x" + height + "]";
 	}
-	
+
 	@Override
 	public OperationType getOperationType() {
 		return OperationType.CROP;
 	}
-	//Writing to JSON
 	@Override
 	public String toJson() {
 		StringBuilder json = new StringBuilder();
@@ -49,7 +73,6 @@ public class CropOp implements ImageOperation {
 		json.append("}");
 		return json.toString();
 	}
-	// Creating objects from JSON
 	public static CropOp fromJson(String json) {
 		int x = Integer.parseInt(extractField(json, "x"));
 		int y = Integer.parseInt(extractField(json, "y"));
@@ -58,7 +81,6 @@ public class CropOp implements ImageOperation {
 		return new CropOp(x, y, width, height);
 	}
 
-	// Extracting data from JSON.
 	private static String extractField(String json, String field) {
 		int idx = json.indexOf("\"" + field + "\"");
 		if (idx == -1) return null;

@@ -40,7 +40,7 @@ public class MainFrame extends JFrame {
 			if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
 					BufferedImage img = ImageIO.read(jfc.getSelectedFile());
-					controller.loadImage(img);
+					controller.loadImage(jfc.getSelectedFile());
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
 				}
@@ -53,12 +53,15 @@ public class MainFrame extends JFrame {
 		JPanel projectButtonsPanel = new JPanel(new GridLayout(1, 2, 2, 2));
 		JButton saveProjBtn = new JButton("Save Project");
 		JButton loadProjBtn = new JButton("Open Project");
+		JButton showResultsBtn = new JButton("Show Results");
 
 		saveProjBtn.setFont(new Font("Arial", Font.PLAIN, 11));
 		loadProjBtn.setFont(new Font("Arial", Font.PLAIN, 11));
+		showResultsBtn.setFont(new Font("Arial", Font.PLAIN, 11));
 
 		projectButtonsPanel.add(saveProjBtn);
 		projectButtonsPanel.add(loadProjBtn);
+		projectButtonsPanel.add(showResultsBtn);
 
 		sidebar = new Sidebar(controller);
 		leftContainer.add(projectButtonsPanel, BorderLayout.NORTH);
@@ -114,6 +117,28 @@ public class MainFrame extends JFrame {
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(this, "Load Error: " + ex.getMessage());
 				}
+			}
+		});
+
+		showResultsBtn.addActionListener(e -> {
+			var res = controller.getModel().getCurrentResult();
+
+			if (res != null && (res.hasString() || res.hasInteger() || res.hasDouble())) {
+				StringBuilder resultText = new StringBuilder("-Analysis Results-\n\n");
+
+				if (res.hasString()) resultText.append(res.getStringResult()).append("\n");
+				if (res.hasInteger()) resultText.append("Count: ").append(res.getIntResult()).append("\n");
+				if (res.hasDouble()) resultText.append("Value: ").append(String.format("%.2f", res.getDoubleResult())).append("\n");
+
+				JOptionPane.showMessageDialog(this,
+						resultText.toString(),
+						"Process Results",
+						JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(this,
+						"No specific data (String, Integer, Double) found for the current operation.\nThis operation only outputs an Image.",
+						"No Results",
+						JOptionPane.WARNING_MESSAGE);
 			}
 		});
 

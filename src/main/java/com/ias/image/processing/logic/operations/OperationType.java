@@ -5,7 +5,8 @@ public enum OperationType {
 	CROP(1), //
 	ROTATE(2), //
 	TILE(3), //
-	GAUSSIANBLUR(4);//
+	GAUSSIANBLUR(4),
+	COLOR_HISTOGRAM(5);//
 
 	private  final int OperationId;
 
@@ -24,4 +25,3 @@ public enum OperationType {
 		return null;
 	}
 }
-

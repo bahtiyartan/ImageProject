@@ -1,11 +1,10 @@
 package com.ias.image.processing.logic.operations;
 
-import java.io.Serializable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 @SuppressWarnings("serial")
-public class TileOp implements ImageOperation, Serializable {
+public class TileOp implements ImageOperation {
 
 	private final int countX;
 	private final int countY;
@@ -36,7 +35,23 @@ public class TileOp implements ImageOperation, Serializable {
 	}
 
 	@Override
-	public BufferedImage apply(BufferedImage img) {
+	public DataType getInputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public DataType getOutputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public OperationResult apply(OperationResult input) {
+		if (input == null || !input.hasImage()) {
+			throw new IllegalArgumentException("Tile operation requires an IMAGE input");
+		}
+
+		BufferedImage img = input.getImageResult();
+
 		int w = img.getWidth();
 		int h = img.getHeight();
 
@@ -55,7 +70,10 @@ public class TileOp implements ImageOperation, Serializable {
 		}
 		g.dispose();
 
-		return newImg;
+		String info = "Tile grid: " + countX + "x" + countY + ", spacing: " + spacingX + "," + spacingY;
+		Double totalArea = (double) newImg.getWidth() * newImg.getHeight();
+
+		return new OperationResult(newImg, info, totalArea, null);
 	}
 
 	@Override
@@ -66,6 +84,11 @@ public class TileOp implements ImageOperation, Serializable {
 	@Override
 	public OperationType getOperationType() {
 		return OperationType.TILE;
+	}
+
+	@Override
+	public int getOperationId() {
+		return OperationType.TILE.getOperationId();
 	}
 
 	@Override
@@ -103,4 +126,3 @@ public class TileOp implements ImageOperation, Serializable {
 		return value.replace("\"", "");
 	}
 }
-

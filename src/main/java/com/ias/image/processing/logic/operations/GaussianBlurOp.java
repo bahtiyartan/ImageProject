@@ -3,7 +3,6 @@ package com.ias.image.processing.logic.operations;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -22,27 +21,40 @@ public class GaussianBlurOp implements ImageOperation {
 		this.borderType = borderType;
 	}
 
-	public int getKernelSize() {
-		return kernelSize;
-	}
+	public int getKernelSize() { return kernelSize; }
+	public double getSigmaX() { return sigmaX; }
+	public int getBorderType() { return borderType; }
 
-	public double getSigmaX() {
-		return sigmaX;
-	}
-
-	public int getBorderType() {
-		return borderType;
+	@Override
+	public DataType getInputType() {
+		return DataType.IMAGE;
 	}
 
 	@Override
-	public BufferedImage apply(BufferedImage img) {
+	public DataType getOutputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public OperationResult apply(OperationResult input) {
+		if (input == null || !input.hasImage()) {
+			throw new IllegalArgumentException("Gaussian Blur operation requires an IMAGE input");
+		}
+
+		BufferedImage img = input.getImageResult();
+
 		BufferedImage bgrImage = convertTo3ByteBGR(img);
 		Mat mat = bufferedImageToMat(bgrImage);
 		Mat blurredMat = new Mat();
 
 		Imgproc.GaussianBlur(mat, blurredMat, new Size(kernelSize, kernelSize), sigmaX, 0, borderType);
 
-		return matToBufferedImage(blurredMat);
+		BufferedImage blurred = matToBufferedImage(blurredMat);
+
+		String info = "GaussianBlur applied with kernel=" + kernelSize + ", sigmaX=" + sigmaX;
+		Double sigmaValue = sigmaX;
+
+		return new OperationResult(blurred, info, sigmaValue, null);
 	}
 
 	private BufferedImage convertTo3ByteBGR(BufferedImage img) {
@@ -82,14 +94,10 @@ public class GaussianBlurOp implements ImageOperation {
 
 	private String getBorderName(int type) {
 		switch (type) {
-			case org.opencv.core.Core.BORDER_CONSTANT:
-				return "CONSTANT";
-			case org.opencv.core.Core.BORDER_REPLICATE:
-				return "REPLICATE";
-			case org.opencv.core.Core.BORDER_REFLECT:
-				return "REFLECT";
-			default:
-				return "DEFAULT";
+			case org.opencv.core.Core.BORDER_CONSTANT: return "CONSTANT";
+			case org.opencv.core.Core.BORDER_REPLICATE: return "REPLICATE";
+			case org.opencv.core.Core.BORDER_REFLECT: return "REFLECT";
+			default: return "DEFAULT";
 		}
 	}
 
@@ -99,10 +107,12 @@ public class GaussianBlurOp implements ImageOperation {
 	}
 
 	@Override
+	public int getOperationId() {
+		return OperationType.GAUSSIANBLUR.getOperationId();
+	}
+	@Override
 	public String toJson() {
-
 		StringBuilder json = new StringBuilder();
-
 		json.append("{\n");
 		json.append("\"operationId\": ").append(getOperationType().getOperationId()).append(",\n");
 		json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
@@ -112,7 +122,6 @@ public class GaussianBlurOp implements ImageOperation {
 		json.append("\"borderType\": ").append(borderType).append("\n");
 		json.append("}\n");
 		json.append("}");
-
 		return json.toString();
 	}
 

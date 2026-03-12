@@ -2,10 +2,9 @@ package com.ias.image.processing.logic.operations;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class RotateOp implements ImageOperation, Serializable {
+public class RotateOp implements ImageOperation {
 
 	private final double angle;
 	private final String hintName;
@@ -30,7 +29,23 @@ public class RotateOp implements ImageOperation, Serializable {
 	}
 
 	@Override
-	public BufferedImage apply(BufferedImage img) {
+	public DataType getInputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public DataType getOutputType() {
+		return DataType.IMAGE;
+	}
+
+	@Override
+	public OperationResult apply(OperationResult input) {
+		if (input == null || !input.hasImage()) {
+			throw new IllegalArgumentException("Rotate operation requires an IMAGE input");
+		}
+
+		BufferedImage img = input.getImageResult();
+
 		double radians = Math.toRadians(angle);
 		double sin = Math.abs(Math.sin(radians));
 		double cos = Math.abs(Math.cos(radians));
@@ -55,7 +70,10 @@ public class RotateOp implements ImageOperation, Serializable {
 
 		g2d.dispose();
 
-		return rotated;
+		String info = "Rotated " + angle + " degrees, Quality: " + hintName;
+		Double angleValue = angle;
+
+		return new OperationResult(rotated, info, angleValue, null);
 	}
 
 	@Override
@@ -66,6 +84,11 @@ public class RotateOp implements ImageOperation, Serializable {
 	@Override
 	public OperationType getOperationType() {
 		return OperationType.ROTATE;
+	}
+
+	@Override
+	public int getOperationId() {
+		return OperationType.ROTATE.getOperationId();
 	}
 
 	@Override
@@ -99,4 +122,3 @@ public class RotateOp implements ImageOperation, Serializable {
 		return value.replace("\"", "");
 	}
 }
-
