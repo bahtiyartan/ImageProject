@@ -128,102 +128,103 @@ public class Sidebar extends JPanel {
 	}
 
 	private void showRotateDialog(RotateOp existingOp, int index) {
-		JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
-		JTextField angleField = new JTextField(existingOp != null ? String.valueOf(existingOp.getAngle()) : "");
-		panel.add(new JLabel("Rotation Angle (Degree):"));
+		JTextField angleField = new JTextField("50", 5);
+
+		String[] hints = {"Bicubic", "Bilinear", "Nearest Neighbor"};
+		JComboBox<String> hintBox = new JComboBox<>(hints);
+		hintBox.setSelectedItem("Bicubic");
+
+		JPanel panel = new JPanel(new GridLayout(2, 2));
+		panel.add(new JLabel("Angle (degrees):"));
 		panel.add(angleField);
+		panel.add(new JLabel("Interpolation:"));
+		panel.add(hintBox);
 
-		String[] qualityNames = { "Bicubic (High Quality)", "Bilinear (Medium)", "Nearest Neighbor (Fast)" };
-		Object[] qualityHints = { RenderingHints.VALUE_INTERPOLATION_BICUBIC,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR };
-		JComboBox<String> qualityCombo = new JComboBox<>(qualityNames);
-		panel.add(new JLabel("Interpolation Method:"));
-		panel.add(qualityCombo);
-
-		int result = JOptionPane.showConfirmDialog(this, panel, "Rotate Settings", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Rotate Operation", JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
 				double angle = Double.parseDouble(angleField.getText().trim());
-				Object hint = qualityHints[qualityCombo.getSelectedIndex()];
-				String hintName = qualityNames[qualityCombo.getSelectedIndex()].split(" ")[0];
+				String hint = (String) hintBox.getSelectedItem();
 
-				RotateOp newOp = new RotateOp(angle, hint, hintName);
-				if (existingOp == null)
-					controller.addOperation(newOp);
-				else
-					controller.updateOperation(index, newOp);
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(this, "Invalid input!");
+				Object hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+				if ("Bilinear".equals(hint)) hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+				else if ("Nearest Neighbor".equals(hint)) hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+
+				RotateOp newOp = new RotateOp(angle, hintObj, hint);
+				if (existingOp == null) controller.addOperation(newOp);
+				else controller.updateOperation(index, newOp);
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(this, "Please enter a valid number.", "Input Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void showGaussianBlurDialog(GaussianBlurOp existingOp, int index) {
-		JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
-		JTextField kernelField = new JTextField(existingOp != null ? String.valueOf(existingOp.getKernelSize()) : "");
+		JTextField kernelField = new JTextField("20", 5);
+		JTextField sigmaField = new JTextField("2", 5);
+
+		String[] borderNames = {"DEFAULT", "CONSTANT", "REPLICATE", "REFLECT"};
+		JComboBox<String> borderBox = new JComboBox<>(borderNames);
+		borderBox.setSelectedItem("DEFAULT");
+
+		JPanel panel = new JPanel(new GridLayout(3, 2));
 		panel.add(new JLabel("Kernel Size:"));
 		panel.add(kernelField);
-		JTextField sigmaField = new JTextField(existingOp != null ? String.valueOf(existingOp.getSigmaX()) : "");
 		panel.add(new JLabel("Sigma X:"));
 		panel.add(sigmaField);
-
-		String[] borderNames = { "BORDER_DEFAULT", "BORDER_CONSTANT", "BORDER_REPLICATE", "BORDER_REFLECT" };
-		JComboBox<String> borderCombo = new JComboBox<>(borderNames);
 		panel.add(new JLabel("Border Type:"));
-		panel.add(borderCombo);
+		panel.add(borderBox);
 
-		int result = JOptionPane.showConfirmDialog(this, panel, "Gaussian Blur Settings", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Gaussian Blur", JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
 				int k = Integer.parseInt(kernelField.getText().trim());
-				double s = Double.parseDouble(sigmaField.getText().trim());
-				int b = existingOp != null ? existingOp.getBorderType() : Core.BORDER_DEFAULT;
+				double sX = Double.parseDouble(sigmaField.getText().trim());
+				String bName = (String) borderBox.getSelectedItem();
 
-				GaussianBlurOp newOp = new GaussianBlurOp(k, s, b);
-				if (existingOp == null)
-					controller.addOperation(newOp);
-				else
-					controller.updateOperation(index, newOp);
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(this, "Invalid input!");
+				int bType = org.opencv.core.Core.BORDER_DEFAULT;
+				if ("CONSTANT".equals(bName)) bType = org.opencv.core.Core.BORDER_CONSTANT;
+				else if ("REPLICATE".equals(bName)) bType = org.opencv.core.Core.BORDER_REPLICATE;
+				else if ("REFLECT".equals(bName)) bType = org.opencv.core.Core.BORDER_REFLECT;
+
+				GaussianBlurOp newOp = new GaussianBlurOp(k, sX, bType);
+				if (existingOp == null) controller.addOperation(newOp);
+				else controller.updateOperation(index, newOp);
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void showTileDialog(TileOp existingOp, int index) {
-		JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
-		JTextField cxF = new JTextField(existingOp != null ? String.valueOf(existingOp.getCountX()) : "");
-		JTextField cyF = new JTextField(existingOp != null ? String.valueOf(existingOp.getCountY()) : "");
-		JTextField sxF = new JTextField(existingOp != null ? String.valueOf(existingOp.getSpacingX()) : "");
-		JTextField syF = new JTextField(existingOp != null ? String.valueOf(existingOp.getSpacingY()) : "");
+		JTextField countXField = new JTextField("2", 5);
+		JTextField countYField = new JTextField("2", 5);
+		JTextField spacingXField = new JTextField("2", 5);
+		JTextField spacingYField = new JTextField("2", 5);
 
-		panel.add(new JLabel("Horizontal Count:"));
-		panel.add(cxF);
-		panel.add(new JLabel("Vertical Count:"));
-		panel.add(cyF);
+		JPanel panel = new JPanel(new GridLayout(4, 2));
+		panel.add(new JLabel("Columns (X count):"));
+		panel.add(countXField);
+		panel.add(new JLabel("Rows (Y count):"));
+		panel.add(countYField);
 		panel.add(new JLabel("Horizontal Spacing:"));
-		panel.add(sxF);
+		panel.add(spacingXField);
 		panel.add(new JLabel("Vertical Spacing:"));
-		panel.add(syF);
+		panel.add(spacingYField);
 
-		int result = JOptionPane.showConfirmDialog(this, panel, "Tile Settings", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Tile Operation", JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
-				int cx = Integer.parseInt(cxF.getText().trim());
-				int cy = Integer.parseInt(cyF.getText().trim());
-				int sx = Integer.parseInt(sxF.getText().trim());
-				int sy = Integer.parseInt(syF.getText().trim());
+				int cx = Integer.parseInt(countXField.getText().trim());
+				int cy = Integer.parseInt(countYField.getText().trim());
+				int sx = Integer.parseInt(spacingXField.getText().trim());
+				int sy = Integer.parseInt(spacingYField.getText().trim());
 
 				TileOp newOp = new TileOp(cx, cy, sx, sy);
-				if (existingOp == null)
-					controller.addOperation(newOp);
-				else
-					controller.updateOperation(index, newOp);
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(this, "Invalid input!");
+				if (existingOp == null) controller.addOperation(newOp);
+				else controller.updateOperation(index, newOp);
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(this, "Please enter valid integers.", "Input Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
