@@ -5,7 +5,7 @@ public enum OperationType {
 	CROP(1, "Crop"), //
 	ROTATE(2, "Rotate"), //
 	TILE(3, "Tile"), //
-	GAUSSIANBLUR(4, "Blur"), //
+	GAUSSIANBLUR(4, "Gaussian Blur"), //
 	COLOR_HISTOGRAM(5, "Color Histogram");//
 
 	private final int OperationId;

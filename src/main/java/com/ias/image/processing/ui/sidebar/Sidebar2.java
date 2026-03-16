@@ -102,6 +102,9 @@ public class Sidebar2 extends JPanel {
 		case ROTATE:
 			opUI = new RotateUI(mainFrame, operation, index);
 			break;
+		case COLOR_HISTOGRAM:
+			opUI = new ColorHistogramUI(mainFrame, operation, index);
+			break;
 		default:
 			opUI = new OperationUI(mainFrame, operation, index);
 		}

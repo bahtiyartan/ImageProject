@@ -56,7 +56,12 @@ public class CropOp implements ImageOperation {
 		int w = Math.max(1, Math.min(width, img.getWidth() - actualX));
 		int h = Math.max(1, Math.min(height, img.getHeight() - actualY));
 
-		BufferedImage cropped = img.getSubimage(actualX, actualY, w, h);
+		BufferedImage subImg = img.getSubimage(actualX, actualY, w, h);
+		BufferedImage cropped = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+
+		java.awt.Graphics2D g = cropped.createGraphics();
+		g.drawImage(subImg, 0, 0, null);
+		g.dispose();
 
 		String info = "Cropped area: " + width + "x" + height;
 		Double area = (double) width * height;
