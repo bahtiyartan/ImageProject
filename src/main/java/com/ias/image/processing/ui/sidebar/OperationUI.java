@@ -16,7 +16,7 @@ import com.ias.image.processing.ui.MainFrame;
 @SuppressWarnings("serial")
 public class OperationUI extends JPanel {
 
-	private MainFrame mainFrame;
+	private MainFrame MainFrame;
 
 	public OperationUI(MainFrame mainFrame, ImageOperation operation, int index) {
 		super(new BorderLayout());
@@ -31,7 +31,10 @@ public class OperationUI extends JPanel {
 		closeButton.setPreferredSize(new Dimension(24, 24));
 
 		header.add(closeButton, BorderLayout.EAST);
-		header.add(new JLabel(operation.getOperationType().toString()), BorderLayout.CENTER);
+		JLabel headerLabel = new JLabel(operation.getOperationType().getDescription());
+		headerLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 2, 0));
+		header.add(headerLabel, BorderLayout.CENTER);
+		header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY));
 		this.add(header, BorderLayout.NORTH);
 
 		JPanel opeartionUI = this.createParametersPanel(operation);
@@ -40,7 +43,8 @@ public class OperationUI extends JPanel {
 
 		this.setAlignmentX(Component.LEFT_ALIGNMENT);
 		this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.getPreferredSize().height));
-		this.setBorder(BorderFactory.createTitledBorder(""));
+		this.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2), BorderFactory.createLineBorder(Color.GRAY)));
+		this.setBackground(Color.WHITE);
 	}
 
 	protected JPanel createParametersPanel(ImageOperation operation) {

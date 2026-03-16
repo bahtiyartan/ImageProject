@@ -8,16 +8,15 @@ import com.ias.image.processing.ui.MainFrame;
 
 @SuppressWarnings("serial")
 public class AddOperationAction extends AbstractUIAction {
-	
+
 	OperationType type;
 
-	public AddOperationAction(MainFrame ide, String name, OperationType type) {
-		super(ide, name, null);
-		
+	public AddOperationAction(MainFrame ide, OperationType type) {
+		super(ide, type.getDescription(), null);
+
 		this.type = type;
 	}
-	
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 

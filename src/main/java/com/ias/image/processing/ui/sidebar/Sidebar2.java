@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -26,7 +27,11 @@ public class Sidebar2 extends JPanel {
 
 		this.setSize(new Dimension(250, 220));
 		this.setPreferredSize(new Dimension(250, 220));
-		this.setBorder(BorderFactory.createTitledBorder("Workflow History"));
+		this.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+		JPanel header = new JPanel(new BorderLayout());
+		header.add(new JLabel(" "));
+		this.add(header, BorderLayout.NORTH);
 
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
