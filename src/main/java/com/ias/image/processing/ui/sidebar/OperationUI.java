@@ -26,11 +26,13 @@ public class OperationUI extends JPanel {
 		this.setBackground(Color.white);
 		JPanel header = new JPanel(new BorderLayout());
 		header.setOpaque(false);
-		JButton closeButton = new JButton(deleteOperation);
-		closeButton.setFocusable(false);
-		closeButton.setPreferredSize(new Dimension(24, 24));
+		JButton deleteButton = new JButton(deleteOperation);
+		deleteButton.setFocusable(false);
+		deleteButton.setPreferredSize(new Dimension(24, 24));
+		deleteButton.setBorder(null);
+		deleteButton.setBackground(Color.white);
 
-		header.add(closeButton, BorderLayout.EAST);
+		header.add(deleteButton, BorderLayout.EAST);
 		JLabel headerLabel = new JLabel(operation.getOperationType().getDescription());
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(0, 2, 2, 0));
 		header.add(headerLabel, BorderLayout.CENTER);

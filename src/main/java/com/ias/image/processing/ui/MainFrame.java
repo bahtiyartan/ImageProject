@@ -36,7 +36,7 @@ import com.ias.util.SimpleFileHandler;
 
 public class MainFrame extends JFrame {
 	
-	private Sidebar2 sidebar2;
+	public Sidebar2 sidebar2;
 
 	private final Sidebar sidebar;
 	private final JLabel display;

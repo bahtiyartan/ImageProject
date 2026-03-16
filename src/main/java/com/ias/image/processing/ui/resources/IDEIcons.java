@@ -9,6 +9,8 @@ import javax.swing.ImageIcon;
 public class IDEIcons {
 
 	public static final ImageIcon DeleteIcon = getIcon(IDEIcons.class.getResource("delete.png"));
+	public static final ImageIcon AddIcon = getIcon(IDEIcons.class.getResource("add.png"));
+
 	public static final Icon OtherIcon = getIcon(IDEIcons.class.getResource("delete.png"));
 
 	public static ImageIcon getIcon(URL url) {
