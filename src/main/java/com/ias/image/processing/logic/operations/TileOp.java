@@ -46,6 +46,7 @@ public class TileOp implements ImageOperation {
 
 	@Override
 	public OperationResult apply(OperationResult input) {
+
 		if (input == null || !input.hasImage()) {
 			throw new IllegalArgumentException("Tile operation requires an IMAGE input");
 		}
@@ -117,7 +118,8 @@ public class TileOp implements ImageOperation {
 
 	private static String extractField(String json, String field) {
 		int idx = json.indexOf("\"" + field + "\"");
-		if (idx == -1) return null;
+		if (idx == -1)
+			return null;
 		int colon = json.indexOf(":", idx);
 		int comma = json.indexOf(",", colon);
 		int endBrace = json.indexOf("}", colon);
