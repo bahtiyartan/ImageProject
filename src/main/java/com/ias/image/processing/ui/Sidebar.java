@@ -25,8 +25,7 @@ public class Sidebar extends JPanel {
 
 		list.setCellRenderer(new DefaultListCellRenderer() {
 			@Override
-			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-														  boolean cellHasFocus) {
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 				if (value instanceof ImageOperation) {
 					setText(((ImageOperation) value).getOperationName());
@@ -36,6 +35,7 @@ public class Sidebar extends JPanel {
 		});
 
 		list.addMouseListener(new MouseAdapter() {
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
@@ -94,8 +94,7 @@ public class Sidebar extends JPanel {
 		deleteItem.setForeground(Color.RED);
 
 		deleteItem.addActionListener(e -> {
-			int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this step?",
-					"Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this step?", "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (confirm == JOptionPane.YES_OPTION) {
 				controller.removeOperation(index);
@@ -134,14 +133,12 @@ public class Sidebar extends JPanel {
 		panel.add(angleField);
 
 		String[] qualityNames = { "Bicubic (High Quality)", "Bilinear (Medium)", "Nearest Neighbor (Fast)" };
-		Object[] qualityHints = { RenderingHints.VALUE_INTERPOLATION_BICUBIC,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR };
+		Object[] qualityHints = { RenderingHints.VALUE_INTERPOLATION_BICUBIC, RenderingHints.VALUE_INTERPOLATION_BILINEAR, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR };
 		JComboBox<String> qualityCombo = new JComboBox<>(qualityNames);
 		panel.add(new JLabel("Interpolation Method:"));
 		panel.add(qualityCombo);
 
-		int result = JOptionPane.showConfirmDialog(this, panel, "Rotate Settings", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Rotate Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
 				double angle = Double.parseDouble(angleField.getText().trim());
@@ -173,8 +170,7 @@ public class Sidebar extends JPanel {
 		panel.add(new JLabel("Border Type:"));
 		panel.add(borderCombo);
 
-		int result = JOptionPane.showConfirmDialog(this, panel, "Gaussian Blur Settings", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Gaussian Blur Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
 				int k = Integer.parseInt(kernelField.getText().trim());
@@ -208,8 +204,7 @@ public class Sidebar extends JPanel {
 		panel.add(new JLabel("Vertical Spacing:"));
 		panel.add(syF);
 
-		int result = JOptionPane.showConfirmDialog(this, panel, "Tile Settings", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Tile Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
 				int cx = Integer.parseInt(cxF.getText().trim());

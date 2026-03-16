@@ -1,23 +1,46 @@
 package com.ias.image.processing.ui;
 
-import com.ias.image.processing.logic.ImageController;
-import com.ias.image.processing.logic.operations.CropOp;
-import com.ias.util.SimpleFileHandler;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import com.ias.image.processing.logic.ImageController;
+import com.ias.image.processing.logic.operations.CropOp;
+import com.ias.image.processing.ui.sidebar.Sidebar2;
+import com.ias.util.SimpleFileHandler;
+
 public class MainFrame extends JFrame {
+	
+	private Sidebar2 sidebar2;
 
 	private final Sidebar sidebar;
 	private final JLabel display;
-	private final ImageController controller;
+	public final ImageController controller;
 
 	private Point startPoint;
 	private Point currentPoint;
@@ -68,6 +91,11 @@ public class MainFrame extends JFrame {
 		leftContainer.add(sidebar, BorderLayout.CENTER);
 
 		add(leftContainer, BorderLayout.WEST);
+		
+		sidebar2 = new Sidebar2(this);
+		
+		add(sidebar2, BorderLayout.EAST);
+		
 
 		display = new JLabel("", SwingConstants.CENTER) {
 			@Override
@@ -114,6 +142,7 @@ public class MainFrame extends JFrame {
 				try {
 					controller.loadProject(jfc.getSelectedFile());
 					sidebar.updateList();
+					sidebar2.rearrange();
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(this, "Load Error: " + ex.getMessage());
 				}
@@ -205,6 +234,8 @@ public class MainFrame extends JFrame {
 		sidebar.updateList();
 		display.revalidate();
 		display.repaint();
+		
+		sidebar2.rearrange();
 	}
 
 	private ImageIcon getScaledImageIcon(BufferedImage srcImg) {
@@ -223,5 +254,9 @@ public class MainFrame extends JFrame {
 		int newH = (int) (srcH * currentScale);
 		Image scaledImg = srcImg.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
 		return new ImageIcon(scaledImg);
+	}
+
+	public ImageController getImageController() {
+		return this.controller;
 	}
 }

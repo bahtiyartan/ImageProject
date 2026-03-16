@@ -12,7 +12,6 @@ public class ImageModel {
 	private BufferedImage currentImage;
 	private OperationResult currentResult;
 
-
 	private final List<ImageOperation> operations = new ArrayList<>();
 
 	public void setOriginalImage(BufferedImage img) {
@@ -23,9 +22,13 @@ public class ImageModel {
 		return originalImage;
 	}
 
-	public void setCurrentResult(OperationResult result) {this.currentResult = result;}
+	public void setCurrentResult(OperationResult result) {
+		this.currentResult = result;
+	}
 
-	public OperationResult getCurrentResult() {	return currentResult;}
+	public OperationResult getCurrentResult() {
+		return currentResult;
+	}
 
 	public void setCurrentImage(BufferedImage img) {
 		this.currentImage = img;

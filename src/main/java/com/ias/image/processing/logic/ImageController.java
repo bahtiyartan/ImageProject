@@ -70,7 +70,8 @@ public class ImageController {
 	}
 
 	private void processImage() {
-		if (model.getOriginalImage() == null) return;
+		if (model.getOriginalImage() == null)
+			return;
 
 		OperationResult currentRes = new OperationResult(model.getOriginalImage(), "Original Loaded", null, null);
 
@@ -113,7 +114,8 @@ public class ImageController {
 		List<ImageOperation> ops = model.getOperations();
 		for (int i = 0; i < ops.size(); i++) {
 			json.append(ops.get(i).toJson());
-			if (i < ops.size() - 1) json.append(",");
+			if (i < ops.size() - 1)
+				json.append(",");
 			json.append("\n");
 		}
 		json.append("]\n");
@@ -146,22 +148,35 @@ public class ImageController {
 
 				for (String raw : opJsons) {
 					String opJson = raw.trim();
-					if (!opJson.startsWith("{")) opJson = "{" + opJson;
-					if (!opJson.endsWith("}")) opJson = opJson + "}";
+					if (!opJson.startsWith("{"))
+						opJson = "{" + opJson;
+					if (!opJson.endsWith("}"))
+						opJson = opJson + "}";
 
 					ImageOperation op = null;
 					String idStr = extractField(opJson, "operationId");
 					if (idStr != null) {
 						int id = Integer.parseInt(idStr);
 						switch (id) {
-							case 1: op = CropOp.fromJson(opJson); break;
-							case 2: op = RotateOp.fromJson(opJson); break;
-							case 3: op = TileOp.fromJson(opJson); break;
-							case 4: op = GaussianBlurOp.fromJson(opJson); break;
-							case 5: op = ColorHistogramOp.fromJson(opJson); break;
+						case 1:
+							op = CropOp.fromJson(opJson);
+							break;
+						case 2:
+							op = RotateOp.fromJson(opJson);
+							break;
+						case 3:
+							op = TileOp.fromJson(opJson);
+							break;
+						case 4:
+							op = GaussianBlurOp.fromJson(opJson);
+							break;
+						case 5:
+							op = ColorHistogramOp.fromJson(opJson);
+							break;
 						}
 					}
-					if (op != null) model.addOperation(op);
+					if (op != null)
+						model.addOperation(op);
 				}
 			}
 		}
@@ -170,7 +185,8 @@ public class ImageController {
 
 	private String extractField(String json, String field) {
 		int idx = json.indexOf("\"" + field + "\"");
-		if (idx == -1) return null;
+		if (idx == -1)
+			return null;
 		int colon = json.indexOf(":", idx);
 		int comma = json.indexOf(",", colon);
 		int endBrace = json.indexOf("}", colon);
