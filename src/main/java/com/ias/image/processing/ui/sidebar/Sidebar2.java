@@ -1,17 +1,24 @@
 package com.ias.image.processing.ui.sidebar;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import com.ias.image.processing.logic.ImageModel;
 import com.ias.image.processing.logic.operations.ImageOperation;
+import com.ias.image.processing.logic.operations.OperationType;
 import com.ias.image.processing.ui.MainFrame;
 
 @SuppressWarnings("serial")
@@ -20,15 +27,34 @@ public class Sidebar2 extends JPanel {
 	public MainFrame mainFrame;
 	private JPanel mainPanel;
 
+	private JButton addOperationsButton;
+
 	public Sidebar2(MainFrame frame) {
 		super(new BorderLayout());
 		this.mainFrame = frame;
 
 		this.setSize(new Dimension(250, 220));
 		this.setPreferredSize(new Dimension(250, 220));
-		this.setBorder(BorderFactory.createTitledBorder("Workflow History"));
+		this.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+		JPanel header = new JPanel(new BorderLayout());
+		header.setOpaque(true);
+		header.add(new JLabel(" "));
+		header.setBackground(Color.WHITE);
+		header.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0), BorderFactory.createLineBorder(Color.GRAY)));
+
+		AddOperationsAction addOperations = new AddOperationsAction(mainFrame);
+		addOperationsButton = new JButton(addOperations);
+		addOperationsButton.setBackground(Color.WHITE);
+		addOperationsButton.setBorder(null);
+		addOperationsButton.setFocusable(false);
+		addOperationsButton.setPreferredSize(new Dimension(24, 24));
+		header.add(addOperationsButton, BorderLayout.EAST);
+		this.add(header, BorderLayout.NORTH);
 
 		mainPanel = new JPanel();
+		mainPanel.setOpaque(true);
+
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		JScrollPane sp = new JScrollPane(mainPanel);
@@ -81,6 +107,26 @@ public class Sidebar2 extends JPanel {
 		}
 
 		return opUI;
+	}
+
+	public void showOperationMenu() {
+		JPopupMenu menu = new JPopupMenu();
+		JMenuItem blurItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.GAUSSIANBLUR));
+		JMenuItem rotateItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.ROTATE));
+		JMenuItem tileItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.TILE));
+		JMenuItem histItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.COLOR_HISTOGRAM));
+
+		JMenuItem cropItem = new JMenuItem("Crop");
+		cropItem.addActionListener(e -> mainFrame.controller.setCropModeActive(true));
+
+		menu.add(cropItem);
+		menu.add(rotateItem);
+		menu.add(tileItem);
+		menu.addSeparator();
+		menu.add(blurItem);
+		menu.addSeparator();
+		menu.add(histItem);
+		menu.show(addOperationsButton, 0, addOperationsButton.getHeight());
 	}
 
 }

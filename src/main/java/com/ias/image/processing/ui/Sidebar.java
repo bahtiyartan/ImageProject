@@ -134,10 +134,10 @@ public class Sidebar extends JPanel {
 
 	private void showOperationMenu(Component invoker) {
 		JPopupMenu menu = new JPopupMenu();
-		JMenuItem blurItem = new JMenuItem(new AddOperationAction(MainFrame, "Gaussian Blur", OperationType.GAUSSIANBLUR));
-		JMenuItem rotateItem = new JMenuItem(new AddOperationAction(MainFrame, "Rotate", OperationType.ROTATE));
-		JMenuItem tileItem = new JMenuItem(new AddOperationAction(MainFrame, "Tile (Grid)", OperationType.TILE));
-		JMenuItem histItem = new JMenuItem(new AddOperationAction(MainFrame, "Color Histogram", OperationType.COLOR_HISTOGRAM));
+		JMenuItem blurItem = new JMenuItem(new AddOperationAction(MainFrame, OperationType.GAUSSIANBLUR));
+		JMenuItem rotateItem = new JMenuItem(new AddOperationAction(MainFrame, OperationType.ROTATE));
+		JMenuItem tileItem = new JMenuItem(new AddOperationAction(MainFrame, OperationType.TILE));
+		JMenuItem histItem = new JMenuItem(new AddOperationAction(MainFrame, OperationType.COLOR_HISTOGRAM));
 
 		JMenuItem cropItem = new JMenuItem("Crop");
 		cropItem.addActionListener(e -> controller.setCropModeActive(true));
