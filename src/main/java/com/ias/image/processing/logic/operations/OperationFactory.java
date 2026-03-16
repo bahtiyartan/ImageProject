@@ -15,10 +15,10 @@ public class OperationFactory {
 			return new TileOp();
 
 		case GAUSSIANBLUR:
-			// return new GaussianBlurOp();
+			return new GaussianBlurOp();
 
 		case COLOR_HISTOGRAM:
-			// return new ColorHistogramOp();
+			return new ColorHistogramOp();
 
 		}
 

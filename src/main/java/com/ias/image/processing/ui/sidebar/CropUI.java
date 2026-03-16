@@ -22,10 +22,10 @@ public class CropUI extends OperationUI {
 
 		if (operation instanceof CropOp) {
 			CropOp cropOp = (CropOp) operation;
-			panel.add(new JLabel("Start x:" + cropOp.getX() +"px"));
+			panel.add(new JLabel("Start x: " + cropOp.getX() +"px"));
 			panel.add(new JLabel("Start Y: " + cropOp.getY() + " px"));
 			panel.add(new JLabel("Width: " + cropOp.getWidth() + " px"));
-			panel.add(new JLabel("Height: " + cropOp.getHeight() + " px"));
+			panel.add(new JLabel("Height : " + cropOp.getHeight() + " px"));
 		} else {
 			panel.add(new JLabel("  Error: Not a Crop Operation"));
 		}

@@ -65,7 +65,6 @@ public class Sidebar2 extends JPanel {
 
 		switch (operation.getOperationType()) {
 		case CROP:
-
 			opUI = new CropUI(mainFrame, operation, index);
 			break;
 		case GAUSSIANBLUR:
@@ -73,6 +72,9 @@ public class Sidebar2 extends JPanel {
 			break;
 		case TILE:
 			opUI = new TileUI(mainFrame, operation, index);
+			break;
+		case ROTATE:
+			opUI = new RotateUI(mainFrame, operation, index);
 			break;
 		default:
 			opUI = new OperationUI(mainFrame, operation, index);
