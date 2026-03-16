@@ -17,10 +17,12 @@ import com.ias.image.processing.ui.MainFrame;
 public class OperationUI extends JPanel {
 
 	private MainFrame MainFrame;
+	private int index;
 
 	public OperationUI(MainFrame mainFrame, ImageOperation operation, int index) {
 		super(new BorderLayout());
 
+		this.index = index;
 		DeleteOperationAction deleteOperation = new DeleteOperationAction(mainFrame, operation, index);
 
 		this.setBackground(Color.white);
@@ -49,6 +51,9 @@ public class OperationUI extends JPanel {
 		this.setBackground(Color.WHITE);
 	}
 
+	public int getIndex() {
+		return this.index;
+	}
 	protected JPanel createParametersPanel(ImageOperation operation) {
 		JPanel panel = new JPanel(new BorderLayout());
 
