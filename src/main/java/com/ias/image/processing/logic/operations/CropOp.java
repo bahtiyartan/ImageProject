@@ -13,6 +13,10 @@ public class CropOp implements ImageOperation {
 		this.width = width;
 		this.height = height;
 	}
+	public int getX() { return x; }
+	public int getY() { return y; }
+	public int getWidth() { return width; }
+	public int getHeight() { return height; }
 
 	@Override
 	public DataType getInputType() {

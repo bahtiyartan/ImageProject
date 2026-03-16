@@ -72,6 +72,9 @@ public class Sidebar2 extends JPanel {
 
 			opUI = new CropUI(mainFrame, operation, index);
 			break;
+
+		case GAUSSIANBLUR:
+				opUI= new GaussianUI(mainFrame, operation, index);
 		default:
 			opUI = new OperationUI(mainFrame, operation, index);
 		}
