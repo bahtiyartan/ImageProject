@@ -9,6 +9,11 @@ public class RotateOp implements ImageOperation {
 	private final double angle;
 	private final String hintName;
 	private transient Object interpolationHint;
+	
+	
+	public RotateOp() {
+		this(0.0, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC, "");
+	}
 
 	public RotateOp(double angle, Object interpolationHint, String hintName) {
 		this.angle = angle;

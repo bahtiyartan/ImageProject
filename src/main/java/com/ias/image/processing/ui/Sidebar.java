@@ -1,13 +1,38 @@
 package com.ias.image.processing.ui;
 
-import com.ias.image.processing.logic.operations.ImageOperation;
-import com.ias.image.processing.logic.ImageController;
-import com.ias.image.processing.logic.operations.*;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import org.opencv.core.Core;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+
+import com.ias.image.processing.logic.ImageController;
+import com.ias.image.processing.logic.operations.CropOp;
+import com.ias.image.processing.logic.operations.GaussianBlurOp;
+import com.ias.image.processing.logic.operations.ImageOperation;
+import com.ias.image.processing.logic.operations.OperationType;
+import com.ias.image.processing.logic.operations.RotateOp;
+import com.ias.image.processing.logic.operations.TileOp;
+import com.ias.image.processing.ui.sidebar.AddOperationAction;
 
 @SuppressWarnings("serial")
 public class Sidebar extends JPanel {
@@ -15,9 +40,11 @@ public class Sidebar extends JPanel {
 	private final DefaultListModel<ImageOperation> listModel = new DefaultListModel<>();
 	private final JList<ImageOperation> list = new JList<>(listModel);
 	private final ImageController controller;
+	private MainFrame MainFrame;
 
-	public Sidebar(ImageController controller) {
+	public Sidebar(MainFrame frame, ImageController controller) {
 		this.controller = controller;
+		this.MainFrame = frame;
 
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(250, 0));
@@ -107,29 +134,28 @@ public class Sidebar extends JPanel {
 
 	private void showOperationMenu(Component invoker) {
 		JPopupMenu menu = new JPopupMenu();
-		JMenuItem blurItem = new JMenuItem("Gaussian Blur");
-		blurItem.addActionListener(e -> showGaussianBlurDialog(null, -1));
+		JMenuItem blurItem = new JMenuItem(new AddOperationAction(MainFrame, "Gaussian Blur", OperationType.GAUSSIANBLUR));
+		JMenuItem rotateItem = new JMenuItem(new AddOperationAction(MainFrame, "Rotate", OperationType.ROTATE));
+		JMenuItem tileItem = new JMenuItem(new AddOperationAction(MainFrame, "Tile (Grid)", OperationType.TILE));
+		JMenuItem histItem = new JMenuItem(new AddOperationAction(MainFrame, "Color Histogram", OperationType.COLOR_HISTOGRAM));
+
 		JMenuItem cropItem = new JMenuItem("Crop");
 		cropItem.addActionListener(e -> controller.setCropModeActive(true));
-		JMenuItem rotateItem = new JMenuItem("Rotate");
-		rotateItem.addActionListener(e -> showRotateDialog(null, -1));
-		JMenuItem tileItem = new JMenuItem("Tile (Grid)");
-		tileItem.addActionListener(e -> showTileDialog(null, -1));
-		JMenuItem histItem = new JMenuItem("Color Histogram");
-		histItem.addActionListener(e -> controller.addOperation(new ColorHistogramOp()));
 
-		menu.add(histItem);
-		menu.add(blurItem);
 		menu.add(cropItem);
 		menu.add(rotateItem);
 		menu.add(tileItem);
+		menu.addSeparator();
+		menu.add(blurItem);
+		menu.addSeparator();
+		menu.add(histItem);
 		menu.show(invoker, 0, -menu.getPreferredSize().height);
 	}
 
 	private void showRotateDialog(RotateOp existingOp, int index) {
 		JTextField angleField = new JTextField("50", 5);
 
-		String[] hints = {"Bicubic", "Bilinear", "Nearest Neighbor"};
+		String[] hints = { "Bicubic", "Bilinear", "Nearest Neighbor" };
 		JComboBox<String> hintBox = new JComboBox<>(hints);
 		hintBox.setSelectedItem("Bicubic");
 
@@ -138,7 +164,6 @@ public class Sidebar extends JPanel {
 		panel.add(angleField);
 		panel.add(new JLabel("Interpolation:"));
 		panel.add(hintBox);
-
 
 		String[] qualityNames = { "Bicubic (High Quality)", "Bilinear (Medium)", "Nearest Neighbor (Fast)" };
 		Object[] qualityHints = { RenderingHints.VALUE_INTERPOLATION_BICUBIC, RenderingHints.VALUE_INTERPOLATION_BILINEAR, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR };
@@ -153,12 +178,16 @@ public class Sidebar extends JPanel {
 				String hint = (String) hintBox.getSelectedItem();
 
 				Object hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-				if ("Bilinear".equals(hint)) hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-				else if ("Nearest Neighbor".equals(hint)) hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+				if ("Bilinear".equals(hint))
+					hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+				else if ("Nearest Neighbor".equals(hint))
+					hintObj = java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 
 				RotateOp newOp = new RotateOp(angle, hintObj, hint);
-				if (existingOp == null) controller.addOperation(newOp);
-				else controller.updateOperation(index, newOp);
+				if (existingOp == null)
+					controller.addOperation(newOp);
+				else
+					controller.updateOperation(index, newOp);
 			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Please enter a valid number.", "Input Error", JOptionPane.ERROR_MESSAGE);
 			}
@@ -169,7 +198,7 @@ public class Sidebar extends JPanel {
 		JTextField kernelField = new JTextField("20", 5);
 		JTextField sigmaField = new JTextField("2", 5);
 
-		String[] borderNames = {"DEFAULT", "CONSTANT", "REPLICATE", "REFLECT"};
+		String[] borderNames = { "DEFAULT", "CONSTANT", "REPLICATE", "REFLECT" };
 		JComboBox<String> borderBox = new JComboBox<>(borderNames);
 		borderBox.setSelectedItem("DEFAULT");
 
@@ -189,13 +218,18 @@ public class Sidebar extends JPanel {
 				String bName = (String) borderBox.getSelectedItem();
 
 				int bType = org.opencv.core.Core.BORDER_DEFAULT;
-				if ("CONSTANT".equals(bName)) bType = org.opencv.core.Core.BORDER_CONSTANT;
-				else if ("REPLICATE".equals(bName)) bType = org.opencv.core.Core.BORDER_REPLICATE;
-				else if ("REFLECT".equals(bName)) bType = org.opencv.core.Core.BORDER_REFLECT;
+				if ("CONSTANT".equals(bName))
+					bType = org.opencv.core.Core.BORDER_CONSTANT;
+				else if ("REPLICATE".equals(bName))
+					bType = org.opencv.core.Core.BORDER_REPLICATE;
+				else if ("REFLECT".equals(bName))
+					bType = org.opencv.core.Core.BORDER_REFLECT;
 
 				GaussianBlurOp newOp = new GaussianBlurOp(k, sX, bType);
-				if (existingOp == null) controller.addOperation(newOp);
-				else controller.updateOperation(index, newOp);
+				if (existingOp == null)
+					controller.addOperation(newOp);
+				else
+					controller.updateOperation(index, newOp);
 			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
 			}
@@ -227,8 +261,10 @@ public class Sidebar extends JPanel {
 				int sy = Integer.parseInt(spacingYField.getText().trim());
 
 				TileOp newOp = new TileOp(cx, cy, sx, sy);
-				if (existingOp == null) controller.addOperation(newOp);
-				else controller.updateOperation(index, newOp);
+				if (existingOp == null)
+					controller.addOperation(newOp);
+				else
+					controller.updateOperation(index, newOp);
 			} catch (NumberFormatException ex) {
 				JOptionPane.showMessageDialog(this, "Please enter valid integers.", "Input Error", JOptionPane.ERROR_MESSAGE);
 			}

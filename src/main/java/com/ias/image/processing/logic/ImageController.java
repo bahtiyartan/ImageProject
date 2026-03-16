@@ -198,4 +198,9 @@ public class ImageController {
 	public ImageModel getModel() {
 		return model;
 	}
+
+	public void addOperation(OperationType type) {
+		ImageOperation op = OperationFactory.createOperation(type);
+		this.addOperation(op);
+	}
 }

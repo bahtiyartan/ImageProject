@@ -11,6 +11,10 @@ public class TileOp implements ImageOperation {
 	private final int spacingX;
 	private final int spacingY;
 
+	public TileOp() {
+		this(1, 1, 0, 0);
+	}
+
 	public TileOp(int countX, int countY, int spacingX, int spacingY) {
 		this.countX = Math.max(1, countX);
 		this.countY = Math.max(1, countY);

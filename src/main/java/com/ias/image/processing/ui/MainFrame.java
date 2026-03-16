@@ -86,7 +86,7 @@ public class MainFrame extends JFrame {
 		projectButtonsPanel.add(loadProjBtn);
 		projectButtonsPanel.add(showResultsBtn);
 
-		sidebar = new Sidebar(controller);
+		sidebar = new Sidebar(this, controller);
 		leftContainer.add(projectButtonsPanel, BorderLayout.NORTH);
 		leftContainer.add(sidebar, BorderLayout.CENTER);
 

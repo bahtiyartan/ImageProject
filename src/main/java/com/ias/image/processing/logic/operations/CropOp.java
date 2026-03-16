@@ -7,16 +7,32 @@ public class CropOp implements ImageOperation {
 
 	private final int x, y, width, height;
 
+	public CropOp() {
+		this(0, 0, 10, 10);
+	}
+
 	public CropOp(int x, int y, int width, int height) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 	}
-	public int getX() { return x; }
-	public int getY() { return y; }
-	public int getWidth() { return width; }
-	public int getHeight() { return height; }
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
 
 	@Override
 	public DataType getInputType() {
@@ -62,6 +78,7 @@ public class CropOp implements ImageOperation {
 	public OperationType getOperationType() {
 		return OperationType.CROP;
 	}
+
 	@Override
 	public String toJson() {
 		StringBuilder json = new StringBuilder();
@@ -77,6 +94,7 @@ public class CropOp implements ImageOperation {
 		json.append("}");
 		return json.toString();
 	}
+
 	public static CropOp fromJson(String json) {
 		int x = Integer.parseInt(extractField(json, "x"));
 		int y = Integer.parseInt(extractField(json, "y"));
@@ -87,7 +105,8 @@ public class CropOp implements ImageOperation {
 
 	private static String extractField(String json, String field) {
 		int idx = json.indexOf("\"" + field + "\"");
-		if (idx == -1) return null;
+		if (idx == -1)
+			return null;
 		int colon = json.indexOf(":", idx);
 		int comma = json.indexOf(",", colon);
 		int endBrace = json.indexOf("}", colon);

@@ -1,16 +1,12 @@
 package com.ias.image.processing.ui.sidebar;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -72,9 +68,12 @@ public class Sidebar2 extends JPanel {
 
 			opUI = new CropUI(mainFrame, operation, index);
 			break;
-
 		case GAUSSIANBLUR:
-				opUI= new GaussianUI(mainFrame, operation, index);
+			opUI = new GaussianUI(mainFrame, operation, index);
+			break;
+		case TILE:
+			opUI = new TileUI(mainFrame, operation, index);
+			break;
 		default:
 			opUI = new OperationUI(mainFrame, operation, index);
 		}

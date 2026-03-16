@@ -2,43 +2,49 @@ package com.ias.image.processing.ui.sidebar;
 
 import java.awt.GridLayout;
 
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-import com.ias.image.processing.logic.operations.ImageOperation;
 import com.ias.image.processing.logic.operations.GaussianBlurOp;
+import com.ias.image.processing.logic.operations.ImageOperation;
 import com.ias.image.processing.ui.MainFrame;
-import org.opencv.core.Core;
 
+@SuppressWarnings("serial")
 public class GaussianUI extends OperationUI {
-    public GaussianUI(MainFrame mainFrame, ImageOperation operation, int index) {
-        super(mainFrame, operation, index);
-    }
 
-    @Override
-    protected JPanel createParametersPanel(ImageOperation operation) {
-        JPanel panel = new JPanel(new GridLayout(3, 1, 2, 2));
-        if (operation instanceof GaussianBlurOp blurOp) {
-            String borderName = "Default";
-            switch (blurOp.getBorderType()) {
-                case Core.BORDER_CONSTANT:
-                    borderName = "Constant";
-                    break;
-                case Core.BORDER_REPLICATE:
-                    borderName = " Replicate";
-                    break;
-                case Core.BORDER_REFLECT:
-                    borderName = "Reflect";
-                    break;
-            }
+	public GaussianUI(MainFrame mainFrame, ImageOperation operation, int index) {
+		super(mainFrame, operation, index);
+	}
 
-            panel.add(new JLabel("Kernel Size:" + blurOp.getKernelSize()));
-            panel.add(new JLabel("Sigma X:" + blurOp.getSigmaX()));
-            panel.add(new JLabel("Border" + borderName));
-        } else {
-            panel.add(new JLabel("Error: Not a Gaussian Blur Operation"));
-        }
-        return panel;
-    }
+	@Override
+	protected JPanel createParametersPanel(ImageOperation operation) {
+
+		JTextField kernelField = new JTextField("20", 5);
+		JTextField sigmaField = new JTextField("2", 5);
+
+		String[] borderNames = { "DEFAULT", "CONSTANT", "REPLICATE", "REFLECT" };
+		JComboBox<String> borderBox = new JComboBox<>(borderNames);
+		borderBox.setSelectedItem("DEFAULT");
+
+		JPanel panel = new JPanel(new GridLayout(3, 2));
+		panel.add(new JLabel("Kernel Size:"));
+		panel.add(kernelField);
+		panel.add(new JLabel("Sigma X:"));
+		panel.add(sigmaField);
+		panel.add(new JLabel("Border Type:"));
+		panel.add(borderBox);
+
+		GaussianBlurOp gbop = (GaussianBlurOp) operation;
+
+		kernelField.setText(Integer.toString(gbop.getKernelSize()));
+		sigmaField.setText(Double.toString(gbop.getSigmaX()));
+
+		// set combo value
+
+		return panel;
+
+	}
 
 }

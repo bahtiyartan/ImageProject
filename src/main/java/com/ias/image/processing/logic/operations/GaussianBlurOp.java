@@ -21,9 +21,17 @@ public class GaussianBlurOp implements ImageOperation {
 		this.borderType = borderType;
 	}
 
-	public int getKernelSize() { return kernelSize; }
-	public double getSigmaX() { return sigmaX; }
-	public int getBorderType() { return borderType; }
+	public int getKernelSize() {
+		return kernelSize;
+	}
+
+	public double getSigmaX() {
+		return sigmaX;
+	}
+
+	public int getBorderType() {
+		return borderType;
+	}
 
 	@Override
 	public DataType getInputType() {
@@ -94,10 +102,14 @@ public class GaussianBlurOp implements ImageOperation {
 
 	private String getBorderName(int type) {
 		switch (type) {
-			case org.opencv.core.Core.BORDER_CONSTANT: return "CONSTANT";
-			case org.opencv.core.Core.BORDER_REPLICATE: return "REPLICATE";
-			case org.opencv.core.Core.BORDER_REFLECT: return "REFLECT";
-			default: return "DEFAULT";
+		case org.opencv.core.Core.BORDER_CONSTANT:
+			return "CONSTANT";
+		case org.opencv.core.Core.BORDER_REPLICATE:
+			return "REPLICATE";
+		case org.opencv.core.Core.BORDER_REFLECT:
+			return "REFLECT";
+		default:
+			return "DEFAULT";
 		}
 	}
 
@@ -110,6 +122,7 @@ public class GaussianBlurOp implements ImageOperation {
 	public int getOperationId() {
 		return OperationType.GAUSSIANBLUR.getOperationId();
 	}
+
 	@Override
 	public String toJson() {
 		StringBuilder json = new StringBuilder();
@@ -134,7 +147,8 @@ public class GaussianBlurOp implements ImageOperation {
 
 	private static String extractField(String json, String field) {
 		int idx = json.indexOf("\"" + field + "\"");
-		if (idx == -1) return null;
+		if (idx == -1)
+			return null;
 		int colon = json.indexOf(":", idx);
 		int comma = json.indexOf(",", colon);
 		int endBrace = json.indexOf("}", colon);
