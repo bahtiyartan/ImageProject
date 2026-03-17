@@ -1,20 +1,32 @@
 package com.ias.image.processing.logic;
 
-import com.ias.image.processing.logic.operations.*;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+
 import javax.imageio.ImageIO;
+
+import com.ias.image.processing.logic.operations.ColorHistogramOp;
+import com.ias.image.processing.logic.operations.CropOp;
+import com.ias.image.processing.logic.operations.DataType;
+import com.ias.image.processing.logic.operations.GaussianBlurOp;
+import com.ias.image.processing.logic.operations.ImageOperation;
+import com.ias.image.processing.logic.operations.OperationFactory;
+import com.ias.image.processing.logic.operations.OperationResult;
+import com.ias.image.processing.logic.operations.OperationType;
+import com.ias.image.processing.logic.operations.RotateOp;
+import com.ias.image.processing.logic.operations.TileOp;
 
 public class ImageController {
 
 	private final ImageModel model;
 	private Runnable updateViewCallback;
 	private String originalImagePath;
+
+	private boolean cropModeActive = false;
 
 	public ImageController(ImageModel model) {
 		this.model = model;
@@ -37,8 +49,6 @@ public class ImageController {
 		processImage();
 	}
 
-	private boolean cropModeActive = false;
-
 	public void setCropModeActive(boolean active) {
 		this.cropModeActive = active;
 		if (updateViewCallback != null)
@@ -57,11 +67,6 @@ public class ImageController {
 		} else {
 			System.out.println("There are no more actions to undo.");
 		}
-	}
-
-	public void updateOperation(int index, ImageOperation newOp) {
-		model.getOperations().set(index, newOp);
-		processImage();
 	}
 
 	public void removeOperation(int index) {
