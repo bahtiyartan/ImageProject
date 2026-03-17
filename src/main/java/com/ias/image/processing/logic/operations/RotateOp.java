@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 @SuppressWarnings("serial")
 public class RotateOp implements ImageOperation {
 
-	private final double angle;
-	private final String hintName;
-	private transient Object interpolationHint;
+	private  double angle;
+	private  String hintName;
+	private Object interpolationHint;
 	
 	
 	public RotateOp() {
@@ -125,5 +125,11 @@ public class RotateOp implements ImageOperation {
 		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
 		String value = json.substring(colon + 1, end).trim();
 		return value.replace("\"", "");
+	}
+
+	public void updateOperation(double newAngle,Object newHintObject, String newHintName){
+		this.angle= newAngle;
+		this.interpolationHint = newHintObject;
+		this.hintName = newHintName;
 	}
 }

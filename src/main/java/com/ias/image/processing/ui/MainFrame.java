@@ -35,10 +35,8 @@ import com.ias.image.processing.ui.sidebar.Sidebar2;
 import com.ias.util.SimpleFileHandler;
 
 public class MainFrame extends JFrame {
-	
-	public Sidebar2 sidebar2;
 
-	private final Sidebar sidebar;
+	public final Sidebar2 sidebar2;
 	private final JLabel display;
 	public final ImageController controller;
 
@@ -72,8 +70,9 @@ public class MainFrame extends JFrame {
 		add(loadBtn, BorderLayout.NORTH);
 
 		JPanel leftContainer = new JPanel(new BorderLayout());
+		leftContainer.setPreferredSize(new Dimension(320, 0));
 
-		JPanel projectButtonsPanel = new JPanel(new GridLayout(1, 2, 2, 2));
+		JPanel projectButtonsPanel = new JPanel(new GridLayout(1, 3, 2, 2));
 		JButton saveProjBtn = new JButton("Save Project");
 		JButton loadProjBtn = new JButton("Open Project");
 		JButton showResultsBtn = new JButton("Show Results");
@@ -85,17 +84,12 @@ public class MainFrame extends JFrame {
 		projectButtonsPanel.add(saveProjBtn);
 		projectButtonsPanel.add(loadProjBtn);
 		projectButtonsPanel.add(showResultsBtn);
-
-		sidebar = new Sidebar(this, controller);
 		leftContainer.add(projectButtonsPanel, BorderLayout.NORTH);
-		leftContainer.add(sidebar, BorderLayout.CENTER);
+
+		sidebar2 = new Sidebar2(this);
+		leftContainer.add(sidebar2, BorderLayout.CENTER);
 
 		add(leftContainer, BorderLayout.WEST);
-		
-		sidebar2 = new Sidebar2(this);
-		
-		add(sidebar2, BorderLayout.EAST);
-		
 
 		display = new JLabel("", SwingConstants.CENTER) {
 			@Override
@@ -141,7 +135,6 @@ public class MainFrame extends JFrame {
 			if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
 					controller.loadProject(jfc.getSelectedFile());
-					sidebar.updateList();
 					sidebar2.rearrange();
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(this, "Load Error: " + ex.getMessage());
@@ -153,7 +146,7 @@ public class MainFrame extends JFrame {
 			var res = controller.getModel().getCurrentResult();
 
 			if (res != null && (res.hasString() || res.hasInteger() || res.hasDouble())) {
-				StringBuilder resultText = new StringBuilder("-Analysis Results-\n\n");
+				StringBuilder resultText = new StringBuilder("Analysis Results\n\n");
 
 				if (res.hasString()) resultText.append(res.getStringResult()).append("\n");
 				if (res.hasInteger()) resultText.append("Count: ").append(res.getIntResult()).append("\n");
@@ -231,10 +224,9 @@ public class MainFrame extends JFrame {
 			display.setCursor(
 					new Cursor(controller.isCropModeActive() ? Cursor.CROSSHAIR_CURSOR : Cursor.DEFAULT_CURSOR));
 		}
-		sidebar.updateList();
 		display.revalidate();
 		display.repaint();
-		
+
 		sidebar2.rearrange();
 	}
 

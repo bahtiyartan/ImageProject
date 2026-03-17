@@ -2,7 +2,6 @@ package com.ias.image.processing.ui.sidebar;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.util.List;
 
@@ -43,6 +42,20 @@ public class Sidebar2 extends JPanel {
 		header.setBackground(Color.WHITE);
 		header.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0), BorderFactory.createLineBorder(Color.GRAY)));
 
+
+		JButton undoButton = new JButton("Undo");
+		undoButton.setBackground(Color.WHITE);
+		undoButton.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+		undoButton.setFocusable(false);
+
+		undoButton.addActionListener(e -> {
+			if (mainFrame.getImageController() != null) {
+				mainFrame.getImageController().undo();
+			}
+		});
+		header.add(undoButton, BorderLayout.WEST);
+
+
 		AddOperationsAction addOperations = new AddOperationsAction(mainFrame);
 		addOperationsButton = new JButton(addOperations);
 		addOperationsButton.setBackground(Color.WHITE);
@@ -54,7 +67,6 @@ public class Sidebar2 extends JPanel {
 
 		mainPanel = new JPanel();
 		mainPanel.setOpaque(true);
-
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		JScrollPane sp = new JScrollPane(mainPanel);

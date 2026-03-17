@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 @SuppressWarnings("serial")
 public class CropOp implements ImageOperation {
 
-	private final int x, y, width, height;
+	private int x, y, width, height;
 
 	public CropOp() {
 		this(0, 0, 10, 10);
@@ -118,5 +118,12 @@ public class CropOp implements ImageOperation {
 		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
 		String value = json.substring(colon + 1, end).trim();
 		return value.replace("\"", "");
+	}
+
+	public void updateOperation(int newX, int newY, int newWidth, int height) {
+		this.x = newX;
+		this.y = newY;
+		this.width = newWidth;
+		this.height = height;
 	}
 }

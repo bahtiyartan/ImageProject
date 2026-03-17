@@ -2,7 +2,6 @@ package com.ias.image.processing.ui.sidebar;
 
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
-import java.awt.event.ActionListener;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,22 +14,21 @@ import com.ias.image.processing.ui.MainFrame;
 @SuppressWarnings("serial")
 public class RotateUI extends OperationUI {
 
-	private MainFrame mainFrame;
+	private JTextField angleField;
+	private JComboBox<String> hintBox;
 
 	public RotateUI(MainFrame mainFrame, ImageOperation operation, int index) {
 		super(mainFrame, operation, index);
-		this.mainFrame = mainFrame;
 	}
 
 	@Override
 	protected JPanel createParametersPanel(ImageOperation operation) {
 
 		RotateOp rotateOp = (RotateOp) operation;
-
-		JTextField angleField = new JTextField(Double.toString(rotateOp.getAngle()), 5);
+		angleField = new JTextField(Double.toString(rotateOp.getAngle()), 5);
 
 		String[] hints = { "Bicubic", "Bilinear", "Nearest Neighbor" };
-		JComboBox<String> hintBox = new JComboBox<>(hints);
+		hintBox = new JComboBox<>(hints);
 
 		String currentHint = rotateOp.getHintName();
 		if (currentHint != null && !currentHint.isEmpty()) {
@@ -39,26 +37,8 @@ public class RotateUI extends OperationUI {
 			hintBox.setSelectedItem("Bicubic");
 		}
 
-		ActionListener updateAction = e -> {
-			try {
-				double newAngle = Double.parseDouble(angleField.getText().trim());
-
-				String newHintName = (String) hintBox.getSelectedItem();
-
-				Object hintObject = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-				if ("Bilinear".equals(newHintName)) {
-					hintObject = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-				} else if ("Nearest Neighbor".equals(newHintName)) {
-					hintObject = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
-				}
-
-				mainFrame.getImageController().updateOperation(getIndex(), new RotateOp(newAngle, hintObject, newHintName));
-
-			} catch (Exception ex) {
-			}
-		};
-		angleField.addActionListener(updateAction);
-		hintBox.addActionListener(updateAction);
+		angleField.addFocusListener(this);
+		hintBox.addFocusListener(this);
 
 		JPanel panel = new JPanel(new GridLayout(2, 2));
 		panel.add(new JLabel("Angle (degrees):"));
@@ -71,7 +51,19 @@ public class RotateUI extends OperationUI {
 
 	@Override
 	protected void updateOperationInformation() {
-		// TODO Auto-generated method stub
 
+			double newAngle = Double.parseDouble(angleField.getText().trim());
+			String newHintName = (String) hintBox.getSelectedItem();
+
+			Object hintObject = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+			if ("Bilinear".equals(newHintName)) {
+				hintObject = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+			} else if ("Nearest Neighbor".equals(newHintName)) {
+				hintObject = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+			}
+
+			RotateOp rop = (RotateOp) this.operation;
+			rop.updateOperation(newAngle,hintObject,newHintName);
+
+		}
 	}
-}
