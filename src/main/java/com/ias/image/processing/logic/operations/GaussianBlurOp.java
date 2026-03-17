@@ -11,18 +11,16 @@ import org.opencv.imgproc.Imgproc;
 @SuppressWarnings("serial")
 public class GaussianBlurOp implements ImageOperation {
 
-	private final int kernelSize;
-	private final double sigmaX;
-	private final int borderType;
+	private int kernelSize;
+	private double sigmaX;
+	private int borderType;
 
 	public GaussianBlurOp() {
-		this(9,1,org.opencv.core.Core.BORDER_CONSTANT);
+		this(9, 1, org.opencv.core.Core.BORDER_CONSTANT);
 	}
 
 	public GaussianBlurOp(int kernelSize, double sigmaX, int borderType) {
-		this.kernelSize = (kernelSize % 2 == 0) ? kernelSize + 1 : Math.max(1, kernelSize);
-		this.sigmaX = sigmaX;
-		this.borderType = borderType;
+		this.updateOperation(kernelSize, sigmaX, borderType);
 	}
 
 	public int getKernelSize() {
@@ -159,5 +157,11 @@ public class GaussianBlurOp implements ImageOperation {
 		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
 		String value = json.substring(colon + 1, end).trim();
 		return value.replace("\"", "");
+	}
+
+	public void updateOperation(int newKernel, double newSigma, int newBorderType) {
+		this.kernelSize = (newKernel % 2 == 0) ? newKernel + 1 : Math.max(1, newKernel);
+		this.sigmaX = newSigma;
+		this.borderType = newBorderType;
 	}
 }

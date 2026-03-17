@@ -12,13 +12,15 @@ import com.ias.image.processing.logic.operations.GaussianBlurOp;
 import com.ias.image.processing.logic.operations.ImageOperation;
 import com.ias.image.processing.ui.MainFrame;
 
+@SuppressWarnings("serial")
 public class GaussianUI extends OperationUI {
-
-	private MainFrame mainFrame;
-
+	
+	private JTextField kernelField;
+	private JTextField sigmaField;
+	private JComboBox<String> borderBox;
+	
 	public GaussianUI(MainFrame mainFrame, ImageOperation operation, int index) {
 		super(mainFrame, operation, index);
-		this.mainFrame = mainFrame;
 	}
 
 	@Override
@@ -26,11 +28,11 @@ public class GaussianUI extends OperationUI {
 
 		GaussianBlurOp blurOp = (GaussianBlurOp) operation;
 
-		JTextField kernelField = new JTextField(Integer.toString(blurOp.getKernelSize()), 5);
-		JTextField sigmaField = new JTextField(Double.toString(blurOp.getSigmaX()), 5);
+		kernelField = new JTextField(Integer.toString(blurOp.getKernelSize()), 5);
+		sigmaField = new JTextField(Double.toString(blurOp.getSigmaX()), 5);
 
 		String[] borderNames = { "DEFAULT", "CONSTANT", "REPLICATE", "REFLECT" };
-		JComboBox<String> borderBox = new JComboBox<>(borderNames);
+		borderBox = new JComboBox<>(borderNames);
 
 		int currentBorder = blurOp.getBorderType();
 		if (currentBorder == Core.BORDER_CONSTANT) {
@@ -43,33 +45,11 @@ public class GaussianUI extends OperationUI {
 			borderBox.setSelectedItem("DEFAULT");
 		}
 
-		ActionListener updateAction = e -> {
-			try {
-				int newKernel = Integer.parseInt(kernelField.getText().trim());
-				double newSigma = Double.parseDouble(sigmaField.getText().trim());
+		kernelField.addFocusListener(this);
+		sigmaField.addFocusListener(this);
+		borderBox.addActionListener(this);
 
-				String selectedBorder = (String) borderBox.getSelectedItem();
-
-				int newBorderType = Core.BORDER_DEFAULT;
-				if ("CONSTANT".equals(selectedBorder)) {
-					newBorderType = Core.BORDER_CONSTANT;
-				} else if ("REPLICATE".equals(selectedBorder)) {
-					newBorderType = Core.BORDER_REPLICATE;
-				} else if ("REFLECT".equals(selectedBorder)) {
-					newBorderType = Core.BORDER_REFLECT;
-				}
-
-				mainFrame.getImageController().updateOperation(getIndex(), new GaussianBlurOp(newKernel, newSigma, newBorderType));
-
-			} catch (Exception ex) {
-			}
-		};
-
-		kernelField.addActionListener(updateAction);
-		sigmaField.addActionListener(updateAction);
-		borderBox.addActionListener(updateAction);
-
-		JPanel panel = new JPanel(new GridLayout(3, 2));
+		JPanel panel = new JPanel(new GridLayout(3, 2, 2, 2));
 		panel.add(new JLabel("Kernel Size:"));
 		panel.add(kernelField);
 		panel.add(new JLabel("Sigma X:"));
@@ -78,5 +58,27 @@ public class GaussianUI extends OperationUI {
 		panel.add(borderBox);
 
 		return panel;
+	}
+
+	@Override
+	protected void updateOperationInformation() {
+		int newKernel = Integer.parseInt(kernelField.getText().trim());
+		double newSigma = Double.parseDouble(sigmaField.getText().trim());
+
+		String selectedBorder = (String) borderBox.getSelectedItem();
+
+		int newBorderType = Core.BORDER_DEFAULT;
+		if ("CONSTANT".equals(selectedBorder)) {
+			newBorderType = Core.BORDER_CONSTANT;
+		} else if ("REPLICATE".equals(selectedBorder)) {
+			newBorderType = Core.BORDER_REPLICATE;
+		} else if ("REFLECT".equals(selectedBorder)) {
+			newBorderType = Core.BORDER_REFLECT;
+		}
+		
+		GaussianBlurOp gop = (GaussianBlurOp) this.operation;
+
+		gop.updateOperation(newKernel, newSigma, newBorderType);
+		
 	}
 }

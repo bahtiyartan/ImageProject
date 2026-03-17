@@ -4,6 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -14,25 +18,30 @@ import com.ias.image.processing.logic.operations.ImageOperation;
 import com.ias.image.processing.ui.MainFrame;
 
 @SuppressWarnings("serial")
-public class OperationUI extends JPanel {
+public abstract class OperationUI extends JPanel implements FocusListener, ActionListener {
 
 	private MainFrame MainFrame;
 	private int index;
+	protected ImageOperation operation;
 
 	public OperationUI(MainFrame mainFrame, ImageOperation operation, int index) {
 		super(new BorderLayout());
 
 		this.index = index;
+		this.operation = operation;
+		this.MainFrame = mainFrame;
+
 		DeleteOperationAction deleteOperation = new DeleteOperationAction(mainFrame, operation, index);
 
 		this.setBackground(Color.white);
 		JPanel header = new JPanel(new BorderLayout());
-		header.setOpaque(false);
+		header.setOpaque(true);
+		header.setBackground(Color.LIGHT_GRAY);
 		JButton deleteButton = new JButton(deleteOperation);
 		deleteButton.setFocusable(false);
 		deleteButton.setPreferredSize(new Dimension(24, 24));
 		deleteButton.setBorder(null);
-		deleteButton.setBackground(Color.white);
+		deleteButton.setBackground(Color.LIGHT_GRAY);
 
 		header.add(deleteButton, BorderLayout.EAST);
 		JLabel headerLabel = new JLabel(operation.getOperationType().getDescription());
@@ -42,6 +51,8 @@ public class OperationUI extends JPanel {
 		this.add(header, BorderLayout.NORTH);
 
 		JPanel opeartionUI = this.createParametersPanel(operation);
+		opeartionUI.setOpaque(true);
+		opeartionUI.setBackground(Color.WHITE);
 
 		this.add(opeartionUI, BorderLayout.CENTER);
 
@@ -54,11 +65,24 @@ public class OperationUI extends JPanel {
 	public int getIndex() {
 		return this.index;
 	}
-	protected JPanel createParametersPanel(ImageOperation operation) {
-		JPanel panel = new JPanel(new BorderLayout());
 
-		panel.add(new JLabel("default operation ui"));
+	protected abstract JPanel createParametersPanel(ImageOperation operation);
 
-		return panel;
+	protected abstract void updateOperationInformation();
+
+	@Override
+	public void focusGained(FocusEvent e) {
+		// do nothing intentionally
+	}
+
+	@Override
+	public void focusLost(FocusEvent e) {
+		this.updateOperationInformation();
+		this.MainFrame.controller.processImage();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		this.updateOperationInformation();
 	}
 }

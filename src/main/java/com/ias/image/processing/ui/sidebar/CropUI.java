@@ -33,4 +33,10 @@ public class CropUI extends OperationUI {
 		return panel;
 	}
 
+	@Override
+	protected void updateOperationInformation() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

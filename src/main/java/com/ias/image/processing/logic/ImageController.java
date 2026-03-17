@@ -69,7 +69,7 @@ public class ImageController {
 		processImage();
 	}
 
-	private void processImage() {
+	public void processImage() {
 		if (model.getOriginalImage() == null)
 			return;
 

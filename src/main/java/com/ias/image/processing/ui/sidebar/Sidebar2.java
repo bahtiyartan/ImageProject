@@ -106,7 +106,7 @@ public class Sidebar2 extends JPanel {
 			opUI = new ColorHistogramUI(mainFrame, operation, index);
 			break;
 		default:
-			opUI = new OperationUI(mainFrame, operation, index);
+			System.out.println("Sidebar2.createOperationPanelUI(), there is not a valid ui for " + operation.getOperationType());
 		}
 
 		return opUI;

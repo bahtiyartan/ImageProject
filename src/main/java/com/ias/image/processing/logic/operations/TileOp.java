@@ -6,20 +6,17 @@ import java.awt.image.BufferedImage;
 @SuppressWarnings("serial")
 public class TileOp implements ImageOperation {
 
-	private final int countX;
-	private final int countY;
-	private final int spacingX;
-	private final int spacingY;
+	public int countX;
+	public int countY;
+	public int spacingX;
+	public int spacingY;
 
 	public TileOp() {
 		this(1, 1, 0, 0);
 	}
 
 	public TileOp(int countX, int countY, int spacingX, int spacingY) {
-		this.countX = Math.max(1, countX);
-		this.countY = Math.max(1, countY);
-		this.spacingX = Math.max(0, spacingX);
-		this.spacingY = Math.max(0, spacingY);
+		this.update(countX, countY, spacingX, spacingY);
 	}
 
 	public int getCountX() {
@@ -130,5 +127,12 @@ public class TileOp implements ImageOperation {
 		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
 		String value = json.substring(colon + 1, end).trim();
 		return value.replace("\"", "");
+	}
+
+	public void update(int countX, int countY, int spacingX, int spacingY) {
+		this.countX = Math.max(1, countX);
+		this.countY = Math.max(1, countY);
+		this.spacingX = Math.max(0, spacingX);
+		this.spacingY = Math.max(0, spacingY);
 	}
 }

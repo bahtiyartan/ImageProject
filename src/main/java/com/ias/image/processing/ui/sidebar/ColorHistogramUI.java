@@ -41,4 +41,9 @@ public class ColorHistogramUI extends OperationUI {
 
         return panel;
     }
+    
+	@Override
+	protected void updateOperationInformation() {
+		System.out.println("ColorHistogramUI.updateOperationInformation()");		
+	}
 }
