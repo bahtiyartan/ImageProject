@@ -6,7 +6,8 @@ public enum OperationType {
 	ROTATE(2, "Rotate"), //
 	TILE(3, "Tile"), //
 	GAUSSIANBLUR(4, "Gaussian Blur"), //
-	COLOR_HISTOGRAM(5, "Color Histogram");//
+	COLOR_HISTOGRAM(5, "Color Histogram"),//
+	GRAYSCALE(6,"GrayScale"); //
 
 	private final int OperationId;
 	private final String Description;

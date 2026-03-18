@@ -9,16 +9,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import com.ias.image.processing.logic.operations.ColorHistogramOp;
-import com.ias.image.processing.logic.operations.CropOp;
-import com.ias.image.processing.logic.operations.DataType;
-import com.ias.image.processing.logic.operations.GaussianBlurOp;
-import com.ias.image.processing.logic.operations.ImageOperation;
-import com.ias.image.processing.logic.operations.OperationFactory;
-import com.ias.image.processing.logic.operations.OperationResult;
-import com.ias.image.processing.logic.operations.OperationType;
-import com.ias.image.processing.logic.operations.RotateOp;
-import com.ias.image.processing.logic.operations.TileOp;
+import com.ias.image.processing.logic.operations.*;
 
 public class ImageController {
 
@@ -178,6 +169,10 @@ public class ImageController {
 						case 5:
 							op = ColorHistogramOp.fromJson(opJson);
 							break;
+						case 6:
+							op = GrayscaleOp.fromJson(opJson);
+							break;
+
 						}
 					}
 					if (op != null)

@@ -20,9 +20,10 @@ public class OperationFactory {
 		case COLOR_HISTOGRAM:
 			return new ColorHistogramOp();
 
-		}
+		case GRAYSCALE:
+			return new GrayscaleOp();
 
-		// TODO: fakyurek
+		}
 		return new RotateOp();
 	}
 }
