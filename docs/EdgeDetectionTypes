@@ -46,6 +46,7 @@ Their meanings in order:
 
 Only ksize (border thickness) and direction (dx-dy) will be sufficient. The others are generally technical background.
 
+
 ## CANNY EDGE DETECTION
 
 Edge Detection is a popular edge detection algorithm. The first step in edge detection, which is sensitive to noise in the image, is to remove noise using a 5x5 Gaussian filter.
@@ -89,6 +90,8 @@ It's not a single-stage operator like Sobel, but a multi-stage process. It shoul
 
 **Time:** It can sometimes create a load in real-time systems (if very high FPS is required).
 
+
+
 ## LAPLACE OPERATOR
 
 Unlike Sobel and Canny, the Laplacian is a second derivative operator. Its difference is that it measures not only the change in brightness but also the change in speed.
@@ -128,6 +131,8 @@ Imgproc.Laplacian(src, dst, ddepth, ksize, scale, delta, borderType)
 - If the user says **"Give me a clean, thin, noise-free edge map"**: You should use **Canny**.
 
 Because Laplacian is very sensitive to noise, it is usually not applied directly. First, the image is softened with **Gaussian Blur**, then **Laplacian** is applied. This is called a **LoG** filter. This method is ideal for preserving edges while suppressing noise.
+
+
 
 ## PREWITT OPERATOR
 
@@ -187,60 +192,74 @@ Laplacian is very good at finding the exact center of edges but is very sensitiv
 Canny both cleans noise and successfully captures even the finest edges.
 (Since Sobel will be used in the project, PreWitt will not be needed.)
 
-## GRAYSCALE OPERATION
 
-In image processing, the Grayscale Operator is the process of converting a color image (usually RGB - Red, Green, Blue) into a single-channel image consisting of grayscale tones between black and white. Color digital images usually consist of three main channels (Red, Green, Blue), and each channel takes values from 0-255 (24-bit color). The Grayscale operator reduces these three channels to a single **intensity** channel. In the resulting image, each pixel only represents the intensity of light; color information (hue and saturation) is discarded.
+# OPENCV THRESHOLDİNG
 
-### OBJECTIVES
+Computers want to simplify images to make sense of them. Thresholding transforms a complex grayscale image into a mask that is only **Black and White** (0 and 1). This is the first and most important step in object decomposition. There are 3 types of thresholding:
 
-- **Reducing Data Size:** By reducing a 3-channel (RGB) image to a 1-channel (Gray) structure, it reduces the amount of data by 1/3.
-- **Reducing Computational Complexity:** Image processing algorithms work on a single channel instead of separately for each of the three channels, yielding much faster results.
-- **Structural Focusing:** Color information is often unnecessary for object recognition or edge detection. What matters is the shape and contrast of the object.
-- **Noise Reduction:** Used in some cases to filter out noise in color channels.
+- Simple thresholding, adaptive thresholding, and Otsu's thresholding.
 
-### WHERE IT IS USED
+### 1. Simple Thresholding
 
-- **Edge Detection:** Algorithms like Canny and Sobel first convert the image to grayscale.
-- **Optical Character Recognition (OCR):** In text-to-speech, the shape of the letter is more important than the color.
-- **Face and Object Recognition:** Used for feature extraction in the initial stage.
-- **Medical Imaging:** X-rays, MRIs, and CT scans are generally grayscale by nature.
-- **Barcode/QR Code Readers:** They only require black and white contrast.
+Here, the situation is quite simple. The same threshold value is applied to each pixel. If the pixel value is less than or equal to the threshold value, it is set to 0; otherwise, it is set to the maximum value. The function [**`cv.threshold`**] is used for the thresholding process. The first argument is the source image, which should be a grayscale image. The second argument is the threshold value used to classify pixel values. The third argument is the maximum value assigned to pixel values that exceed the threshold. OpenCV offers different thresholding types given by the function's fourth parameter. ****The basic thresholding described above is done using the [**`cv.THRESH_BINARY`**](https://docs.opencv.org/4.x/d7/d1b/group__imgproc__misc.html#ggaa9e58d2860d4afa658ef70a9b1115576a147222a96556ebc1d948b372bcd7ac59) type. All simple thresholding types are:
 
-### What are the Parameters?
+- [cv.THRESH_BINARY]
+- [cv.THRESH_BINARY_INV]
+- [cv.THRESH_TRUNC]
+- [cv.THRESH_TOZERO]
+- [cv.THRESH_TOZERO_INV]
 
-The most fundamental parameter in grayscale conversion is Channel Weights. This determines how much each color channel (R, G, B) contributes to the final grayscale value. These parameters vary depending on the chosen method.
+This method returns two outputs. The first is the threshold value used, and the second is the thresholded image.
 
-### GRAYSCALE METHODS: AVERAGE AND LUMINANCE
+It is a method used to convert the given input image into a binary image. A binary image is defined as black and white. It is used for different purposes, such as reducing noise on the image or identifying objects, like morphological operators. Depending on the thresholding type applied to the given input image, it updates the pixels as black or white according to the given threshold value.
 
-- AVERAGE (ARITHMETIC MEAN) METHOD:
+We will use the threshold() method in Imgproc for the thresholding operation. This method takes five parameters. The source mat object, i.e., the input image, takes a second mat object as a target. This target object takes a threshold value called thresh to hold the processing result, a maximum value for types like THRESH_BINARY and THRESH_BINARY_INV, and a threshold type as parameters, as mentioned above.
 
-In this method, the values of the three color channels are added together and divided by three. The logic is that equal proportions are given to each color.
+- Imgproc.threshold(sourceMat, targetMat, thresholdVale, maximumValue, thresholdType);
 
-Disadvantage: The human eye does not perceive colors equally. For example, pure green appears much brighter to the human eye than pure blue. Because this method neglects the biological structure of the human eye, the results may sometimes appear "flat" or "lifeless".
+**THRESH_BINARY**
 
-- LUMINANCE (WEIGHTED AVERAGE) METHOD:
+If a pixel on the source image is greater than the threshold value, it is assigned to the maximumValue parameter.
 
-This method is based on the color sensitivity of the human eye. Our eyes are most sensitive to green and least sensitive to blue.
+**THRESH_BINARY_INV**
 
-The logic:
+If a pixel on the source image is less than the threshold value, it is assigned to the maximumValue parameter. THRESH_BINARY_INV can be used as the opposite of THRESH_BINARY.
 
-Green (58.7%): Constitutes most of the perceived brightness in the image.
+**THRESH_TRUNC**
 
-Red (29.9%): Moderately effective.
+The pixel on the source image,
 
-Blue (11.4%): Has the lowest brightness effect.
+**THRESH_TOZERO**
 
-Advantage: The resulting grayscale image reflects the brightness distribution of the original color image in a way that is most natural to the human eye. Most professional software today uses this method.
+If the pixel on the source image is larger than the given limit value, the pixel value will be preserved; otherwise, the pixel will be assigned black.
 
-### ADVANTAGES AND DISADVANTAGES
+**THRESH_TOZERO_INV**
 
-Advantages:
+If the pixel on the source image is smaller than the given limit value, the pixel value will be preserved; otherwise, the pixel will be assigned black.
 
-1. **Speed:** Processor and memory usage is minimized.
-2. **Simplicity:** Since the algorithms run on a single matrix (2D), coding is easier.
-3. **Standardization:** Reduces colored objects under different lighting conditions to a similar intensity level.
+### 2. Adaptive Thresholding
 
-Disadvantages:
+In the previous section, we used a single global value as the threshold. However, this may not always work well; for example, if different regions of an image have different lighting conditions. In this case, adaptive thresholding can help. Here, the algorithm determines the threshold value for a pixel based on a small region around it. Thus, we obtain different threshold values for different regions of the same image; this gives better results for images with varying lighting.
 
-1. **Loss of Information:** The difference between colors disappears. For example, a red apple and a green apple with the same brightness values may appear to have the same tone when transformed into gray, becoming indistinguishable from each other.
-2. **Loss of Aesthetics:** The emotional impact of colors in artistic works is lost.
+In addition to the parameters described above, the [**cv.adaptiveThreshold**] method takes three input parameters:
+
+The **adaptiveMethod** decides how the threshold value will be calculated:
+
+- [cv.ADAPTIVE_THRESH_MEAN_C]: The threshold value is obtained by subtracting the constant from the average of the adjacent areas.
+- [cv.ADAPTIVE_THRESH_GAUSSIAN_C]: The threshold value is obtained by subtracting the constant from the Gaussian weighted sum of the neighborhood values.
+
+blockSize determines the size of the neighboring area, and C is a constant derived from the average or weighted sum of the neighboring pixels.
+
+### 3. Otsu's Binarization
+
+In the global thresholding method, we used an arbitrarily chosen value as the threshold. In contrast, the Otsu method eliminates the need to select a value and determines it automatically.
+
+Consider an image with only two different image values (a bimodal image); the histogram will consist of only two peaks. A good threshold value would be in the middle of these two values. Similarly, the Otsu method determines the optimal global threshold value from the image histogram.
+
+To do this, the function [**cv.threshold()**] is used, and an additional flag [**cv.THRESH_OTSU**]is passed. The threshold value can be chosen arbitrarily. The algorithm then finds the most suitable threshold value, and this value is returned as the initial output.
+
+IN SUMMARY:
+
+- This function is generally used to create binary images from a grayscale image. It can also be used with color images.
+- It filters the pixel values of the source image to be either too large or too small.
+- It is mostly used to remove noise from images.

@@ -120,6 +120,10 @@ public class Sidebar2 extends JPanel {
 		case GRAYSCALE:
 			opUI = new GrayscaleUI(mainFrame, operation, index);
 			break;
+        case THRESHOLD:
+            opUI = new ThresholdUI(mainFrame, operation, index);
+            break;
+
 		default:
 			System.out.println("Sidebar2.createOperationPanelUI(), there is not a valid ui for " + operation.getOperationType());
 		}
@@ -134,19 +138,22 @@ public class Sidebar2 extends JPanel {
 		JMenuItem tileItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.TILE));
 		JMenuItem histItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.COLOR_HISTOGRAM));
 		JMenuItem grayItem  = new JMenuItem(new AddOperationAction(mainFrame, OperationType.GRAYSCALE));
+        JMenuItem thresholdItem  = new JMenuItem(new AddOperationAction(mainFrame, OperationType.THRESHOLD));
 
 
-		JMenuItem cropItem = new JMenuItem("Crop");
+        JMenuItem cropItem = new JMenuItem("Crop");
 		cropItem.addActionListener(e -> mainFrame.controller.setCropModeActive(true));
+
 
 		menu.add(cropItem);
 		menu.add(rotateItem);
 		menu.add(tileItem);
 		menu.addSeparator();
 		menu.add(blurItem);
-		menu.addSeparator();
-		menu.add(histItem);
 		menu.add(grayItem);
+        menu.add(histItem);
+        menu.add(thresholdItem);
+        menu.addSeparator();
 		menu.show(addOperationsButton, 0, addOperationsButton.getHeight());
 	}
 

@@ -2,12 +2,14 @@ package com.ias.image.processing.logic.operations;
 
 public enum OperationType {
 
-	CROP(1, "Crop"), //
-	ROTATE(2, "Rotate"), //
-	TILE(3, "Tile"), //
-	GAUSSIANBLUR(4, "Gaussian Blur"), //
-	COLOR_HISTOGRAM(5, "Color Histogram"),//
-	GRAYSCALE(6,"GrayScale"); //
+	CROP(1, "Crop"),
+	ROTATE(2, "Rotate"),
+	TILE(3, "Tile"),
+	GAUSSIANBLUR(4, "Gaussian Blur"),
+	COLOR_HISTOGRAM(5, "Color Histogram"),
+	GRAYSCALE(6,"GrayScale"),
+    THRESHOLD(7, "Threshold");
+
 
 	private final int OperationId;
 	private final String Description;

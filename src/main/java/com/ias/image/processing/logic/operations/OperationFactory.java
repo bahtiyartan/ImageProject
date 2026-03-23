@@ -23,6 +23,9 @@ public class OperationFactory {
 		case GRAYSCALE:
 			return new GrayscaleOp();
 
+        case THRESHOLD:
+            return new ThresholdOp();
+
 		}
 		return new RotateOp();
 	}

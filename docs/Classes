@@ -37,3 +37,62 @@ We create a new class that packages the image and the operation list into a sing
 The main reason for using the `Serializable` interface is to "freeze" the current parameters of objects, write them to a file, and then revive the objects from that file in their original state. Normally, objects in Java reside in the computer's **RAM** (temporary memory). These objects disappear the moment you close the application.
 
 We combined the original image (`byte[]`) and the operation list (`List<ImageOperation>`) into a single `ProjectData` object. This class acted as a "box".
+
+
+## GRAYSCALE OPERATION CLASS
+
+In image processing, the Grayscale Operator is the process of converting a color image (usually RGB - Red, Green, Blue) into a single-channel image consisting of grayscale tones between black and white. Color digital images usually consist of three main channels (Red, Green, Blue), and each channel takes values from 0-255 (24-bit color). The Grayscale operator reduces these three channels to a single **intensity** channel. In the resulting image, each pixel only represents the intensity of light; color information (hue and saturation) is discarded.
+
+### OBJECTIVES
+
+- **Reducing Data Size:** By reducing a 3-channel (RGB) image to a 1-channel (Gray) structure, it reduces the amount of data by 1/3.
+- **Reducing Computational Complexity:** Image processing algorithms work on a single channel instead of separately for each of the three channels, yielding much faster results.
+- **Structural Focusing:** Color information is often unnecessary for object recognition or edge detection. What matters is the shape and contrast of the object.
+- **Noise Reduction:** Used in some cases to filter out noise in color channels.
+
+### WHERE IT IS USED
+
+- **Edge Detection:** Algorithms like Canny and Sobel first convert the image to grayscale.
+- **Optical Character Recognition (OCR):** In text-to-speech, the shape of the letter is more important than the color.
+- **Face and Object Recognition:** Used for feature extraction in the initial stage.
+- **Medical Imaging:** X-rays, MRIs, and CT scans are generally grayscale by nature.
+- **Barcode/QR Code Readers:** They only require black and white contrast.
+
+### What are the Parameters?
+
+The most fundamental parameter in grayscale conversion is Channel Weights. This determines how much each color channel (R, G, B) contributes to the final grayscale value. These parameters vary depending on the chosen method.
+
+### GRAYSCALE METHODS: AVERAGE AND LUMINANCE
+
+- AVERAGE (ARITHMETIC MEAN) METHOD:
+
+In this method, the values of the three color channels are added together and divided by three. The logic is that equal proportions are given to each color.
+
+Disadvantage: The human eye does not perceive colors equally. For example, pure green appears much brighter to the human eye than pure blue. Because this method neglects the biological structure of the human eye, the results may sometimes appear "flat" or "lifeless".
+
+- LUMINANCE (WEIGHTED AVERAGE) METHOD:
+
+This method is based on the color sensitivity of the human eye. Our eyes are most sensitive to green and least sensitive to blue.
+
+The logic:
+
+Green (58.7%): Constitutes most of the perceived brightness in the image.
+
+Red (29.9%): Moderately effective.
+
+Blue (11.4%): Has the lowest brightness effect.
+
+Advantage: The resulting grayscale image reflects the brightness distribution of the original color image in a way that is most natural to the human eye. Most professional software today uses this method.
+
+### ADVANTAGES AND DISADVANTAGES
+
+Advantages:
+
+1. **Speed:** Processor and memory usage is minimized.
+2. **Simplicity:** Since the algorithms run on a single matrix (2D), coding is easier.
+3. **Standardization:** Reduces colored objects under different lighting conditions to a similar intensity level.
+
+Disadvantages:
+
+1. **Loss of Information:** The difference between colors disappears. For example, a red apple and a green apple with the same brightness values may appear to have the same tone when transformed into gray, becoming indistinguishable from each other.
+2. **Loss of Aesthetics:** The emotional impact of colors in artistic works is lost.

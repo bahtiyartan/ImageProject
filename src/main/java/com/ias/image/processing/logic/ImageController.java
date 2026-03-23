@@ -172,6 +172,9 @@ public class ImageController {
 						case 6:
 							op = GrayscaleOp.fromJson(opJson);
 							break;
+                        case 7:
+                            op = ThresholdOp.fromJson(opJson);
+                            break;
 
 						}
 					}
