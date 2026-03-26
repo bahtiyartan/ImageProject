@@ -1,4 +1,4 @@
-### GAUSSIAN BLUR CLASS
+## GAUSSIAN BLUR CLASS
 
 Gaussian blur is one of the most common techniques used to smooth an image and reduce noise.
 
@@ -10,7 +10,8 @@ Gaussian Blur recalculates the value of each pixel based on the weighted average
 - BORDER_CONSTANT: Add black/constant color to the edges.
 - BORDER_REPLICATE: Mirrors/extends edge pixels outwards. - BORDER_DEFAULT: A slightly smarter and improved version of the BORDER_REFLECT method. It uses the edge of the image like a mirror but does not repeat the outermost pixel.
 
-### ROTATE CLASS:
+
+## ROTATE CLASS:
 
 For now, we are only adding the Interpolation parameter to the **Rotate** operation.
 
@@ -22,7 +23,8 @@ Here are the interpolation options we will use and their meanings:
 - **Bilinear (Medium Quality):** Takes into account the surrounding 4 pixels. It is a balance between speed and quality.
 - **Nearest Neighbor (Fastest):** Looks at the closest single pixel. It is fast, but may cause aliasing at the edges after rotation.
 
-### PROJECT-BASED SAVING:
+
+## PROJECT-BASED SAVING:
 
 We will create a special **project file** format containing the image itself and your Workflow History. This structure will allow you to continue from where you left off when you close and reopen the application.
 
@@ -34,14 +36,17 @@ We will create a special **project file** format containing the image itself and
 
 We create a new class that packages the image and the operation list into a single package. Since `BufferedImage` cannot be saved directly, we will store it by converting it to a `byte[]` array.
 
-The main reason for using the `Serializable` interface is to "freeze" the current parameters of objects, write them to a file, and then revive the objects from that file in their original state. Normally, objects in Java reside in the computer's **RAM** (temporary memory). These objects disappear the moment you close the application.
+The main reason for using the `Serializable` interface is to "freeze" the current parameters of objects, write them to a file, and then revive the objects from that file in their original state.
+Normally, objects in Java reside in the computer's **RAM** (temporary memory). These objects disappear the moment you close the application.
 
 We combined the original image (`byte[]`) and the operation list (`List<ImageOperation>`) into a single `ProjectData` object. This class acted as a "box".
 
 
 ## GRAYSCALE OPERATION CLASS
 
-In image processing, the Grayscale Operator is the process of converting a color image (usually RGB - Red, Green, Blue) into a single-channel image consisting of grayscale tones between black and white. Color digital images usually consist of three main channels (Red, Green, Blue), and each channel takes values from 0-255 (24-bit color). The Grayscale operator reduces these three channels to a single **intensity** channel. In the resulting image, each pixel only represents the intensity of light; color information (hue and saturation) is discarded.
+In image processing, the Grayscale Operator is the process of converting a color image (usually RGB - Red, Green, Blue) into a single-channel image consisting of grayscale tones between black and white.
+Color digital images usually consist of three main channels (Red, Green, Blue), and each channel takes values from 0-255 (24-bit color). The Grayscale operator reduces these three channels to a single **intensity** channel.
+In the resulting image, each pixel only represents the intensity of light; color information (hue and saturation) is discarded.
 
 ### OBJECTIVES
 
@@ -68,7 +73,8 @@ The most fundamental parameter in grayscale conversion is Channel Weights. This 
 
 In this method, the values of the three color channels are added together and divided by three. The logic is that equal proportions are given to each color.
 
-Disadvantage: The human eye does not perceive colors equally. For example, pure green appears much brighter to the human eye than pure blue. Because this method neglects the biological structure of the human eye, the results may sometimes appear "flat" or "lifeless".
+Disadvantage: The human eye does not perceive colors equally. For example, pure green appears much brighter to the human eye than pure blue.
+Because this method neglects the biological structure of the human eye, the results may sometimes appear "flat" or "lifeless".
 
 - LUMINANCE (WEIGHTED AVERAGE) METHOD:
 
@@ -94,5 +100,91 @@ Advantages:
 
 Disadvantages:
 
-1. **Loss of Information:** The difference between colors disappears. For example, a red apple and a green apple with the same brightness values may appear to have the same tone when transformed into gray, becoming indistinguishable from each other.
+1. **Loss of Information:** The difference between colors disappears.
+For example, a red apple and a green apple with the same brightness values may appear to have the same tone when transformed into gray, becoming indistinguishable from each other.
 2. **Loss of Aesthetics:** The emotional impact of colors in artistic works is lost.
+
+
+
+
+# HISTOGRAM EQUALIZATION
+
+Histogram equalization is a mathematical method used in digital image processing to increase the global contrast of an image. An image's **color histogram** shows the distribution of pixel intensities (brightness levels).
+If an image is too dark or too bright, its pixels are compressed into a narrow range. Histogram equalization spreads these compressed pixel values across the full available range (typically 0–255 for 8-bit images), making the image appear sharper and more detailed.
+
+## Purpose and Use Cases
+**Core Purpose:** By stretching the most frequently occurring pixel intensity values, the method gives low-contrast areas higher contrast. As a result, fine details that are difficult for the human eye or algorithms to distinguish — hidden in shadows or backgrounds — are revealed.
+
+**Primary Uses:**
+- **Detail Enhancement:** Making object boundaries and textures visible within the image.
+- **Preprocessing:** Optimizing an image before applying further operations such as Thresholding, Edge Detection, or Gaussian Blur.
+- **Exposure Correction:** Balancing incorrectly exposed photographs (too dark or too bright).
+
+
+## Where Is It Used
+Histogram equalization is frequently preferred in fields where **information content** matters more than visual naturalness:
+
+1. **Medical Imaging:** Used in X-rays, MRI, and CT scans to enhance contrast, making bone tissue or tumors more visible.
+2. **Satellite and Space Photography:** Applied to radar and satellite imagery to reveal terrain features or subtle geographical details on planetary surfaces.
+3. **Computer Vision Systems:** Used to standardize images into a consistent format so that face recognition or object detection algorithms are not affected by lighting variations.
+
+
+## Parameters
+Standard (Global) Histogram Equalization computes across the entire image globally and therefore typically requires no external parameters.
+It is fully automatic: it calculates the Cumulative Distribution Function (CDF) and maps the existing pixel values to new ones.
+However, the standard method has certain drawbacks (e.g., overexposing already bright regions or amplifying noise). Advanced methods developed to overcome these issues — such as **CLAHE** (Contrast Limited Adaptive Histogram Equalization) — do have configurable parameters:
+
+1. **Tile Grid Size:** Before processing, the image is divided into small blocks (tiles) — for example, 8×8-pixel blocks. The equalization is applied independently to each tile. This parameter controls the block size.
+2. **Clip Limit:** A threshold value that prevents noise from rising excessively. If a pixel value exceeds this limit, the excess is clipped and redistributed to the other pixels.
+
+## Critical Points to Keep in Mind
+
+- **Color Images (RGB):** Applying histogram equalization directly and separately to the Red, Green, and Blue channels severely distorts color balance.
+When processing a color image, the correct approach is to first convert it to a color space such as HSV, HSL, or YCbCr, apply equalization only to the **luminance (Luminance/Value) channel**, and then convert back to RGB.
+- **Noise Amplification:** Since background noise also carries pixel values, standard equalization amplifies that noise as well. For noisy photographs, it can be helpful to apply a light smoothing filter (such as Gaussian Blur) before or after the operation.
+
+
+
+
+# CONTRAST STRETCHING
+
+Contrast stretching (frequently referred to in the literature as normalization )is a fundamental image enhancement technique that aims to improve an image's contrast by stretching the existing pixel intensity (brightness) range to a wider, usable range.
+
+## Purpose and Use Cases
+
+**Core Purpose:** In photographs taken in faint, hazy, or low-light conditions, pixels are typically compressed into a narrow brightness range.
+Contrast stretching takes these compressed pixels and spreads them uniformly across the full available range (e.g., 0 to 255 for an 8-bit image), making details in the image far more distinct and "crisp."
+**Primary Uses:**
+- **Natural Contrast Enhancement:** Used solely to eliminate faintness without disturbing the image's original color and lighting balance.
+- **Data Type Conversion:** For example, when compressing a scientific scan image with floating-point values ranging from 0 to 5,000 into an 8-bit (0–255) integer format for display on a standard screen, it minimizes data loss during the conversion.
+
+## Key Difference from Histogram Equalization
+
+These two operations are frequently confused, but their underlying logic and results are entirely different:
+- **Contrast Stretching (Linear):** Applies a mathematically linear scaling to pixels. The shape of the image's histogram largely remains the same — it is simply stretched left or right like a rubber band. Results therefore always appear more natural to the eye, and the operation is gentler.
+- **Histogram Equalization (Non-linear):** Forcibly reshapes the pixel distribution to equalize it (using the Cumulative Distribution Function). It increases contrast far more aggressively, but can cause the image to appear artificial or over-processed.
+
+## How It Works and Its Parameters
+
+The mathematics of basic contrast stretching is computed around four key boundary values (parameters):
+1. **Target Lower Bound (a):** The desired minimum pixel value (typically 0).
+2. **Target Upper Bound (b):** The desired maximum pixel value (typically 255).
+3. **Current Minimum Value (c):** The darkest pixel value currently present in the image.
+4. **Current Maximum Value (d):** The brightest pixel value currently present in the image.
+
+The algorithm takes every pixel in the image, pulls it out of the **(c, d)** range, and maps it into the **(a, b)** range using a simple proportional calculation.
+
+## The Outlier Problem and Advanced Parameters
+
+The biggest weakness of the basic method is outlier pixels. For instance, if a single pixel in an otherwise completely dark photograph is pure white (255), the algorithm treats that as the value of d and performs no stretching at all. More robust methods and parameters are used to overcome this:
+- **Percentiles:** Instead of using the absolute extremes (0th and 100th percentile) when finding the minimum and maximum values, the algorithm uses — for example — the 5th and 95th percentiles.
+The darkest 5% of pixels are clipped directly to 0, the brightest 5% are clipped directly to 255, and the remaining 90% of the core data is stretched across this new range. This prevents sensor noise or erroneous bright pixels from corrupting the operation.
+- **Cutoff Fraction:** The histogram is analyzed to find the most frequently occurring brightness level (the peak). Frequencies below a defined fraction of that peak (e.g., 3%) are treated as noise and excluded from the calculation, allowing the c and d boundaries to be determined more reliably.
+
+## Where It Is Used and Critical Points
+
+1. **Color (RGB) Images:** Unlike histogram equalization, when contrast stretching is applied to color photographs, the same offset and scaling ratio is applied uniformly across all color channels (Red, Green, Blue). This increases contrast while preserving the color balance and color ratios.
+2. **Prior to Edge Detection:** Before running edge-finding algorithms such as Sobel or Canny, contrast stretching is an effective preprocessing step that naturally enhances contrast, making edges easier for software to detect.
+3. **Low-Light Photography:** In photographs taken at night or in low light, the majority of pixels are clustered toward the lower end of the range. Stretching this cluster outward makes objects significantly more distinguishable.
+
+In summary: if your goal is to give an image a more dynamic range by simply lifting the "hazy veil" over it — without compromising its naturalness — contrast stretching is always one of the first methods to reach for, and among the cleanest in terms of results.

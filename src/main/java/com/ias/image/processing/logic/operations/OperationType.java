@@ -8,7 +8,9 @@ public enum OperationType {
 	GAUSSIANBLUR(4, "Gaussian Blur"),
 	COLOR_HISTOGRAM(5, "Color Histogram"),
 	GRAYSCALE(6,"GrayScale"),
-    THRESHOLD(7, "Threshold");
+    THRESHOLD(7, "Threshold"),
+    HISTOGRAM_EQ(8, "Histogram Equalization"),
+    CONTRAST_STRETCH(9, "Contrast Stretching");
 
 
 	private final int OperationId;

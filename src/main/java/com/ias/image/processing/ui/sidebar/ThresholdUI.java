@@ -43,8 +43,17 @@ public class ThresholdUI extends OperationUI {
         maxValField = new JTextField(Double.toString(tOp.getMaxVal()), 5);
         maxValField.addFocusListener(this);
 
-        String[] types = { "BINARY", "BINARY_INV", "TRUNC", "TOZERO", "TOZERO_INV" };
-        typeBox = new JComboBox<>(types);
+        typeBox = new JComboBox<>();
+        if ("Adaptive".equals(tOp.getMode())) {
+            typeBox.addItem("BINARY");
+            typeBox.addItem("BINARY_INV");
+        } else {
+            typeBox.addItem("BINARY");
+            typeBox.addItem("BINARY_INV");
+            typeBox.addItem("TRUNC");
+            typeBox.addItem("TOZERO");
+            typeBox.addItem("TOZERO_INV");
+        }
 
         int tType = tOp.getThresholdType();
         if (tType == Imgproc.THRESH_BINARY) typeBox.setSelectedItem("BINARY");
@@ -115,6 +124,28 @@ public class ThresholdUI extends OperationUI {
         modeBox.addActionListener(e -> {
             String selectedMode = (String) modeBox.getSelectedItem();
             cardLayout.show(cards, selectedMode);
+
+            String currentType = (String) typeBox.getSelectedItem();
+            typeBox.removeAllItems();
+
+            if ("Adaptive".equals(selectedMode)) {
+                typeBox.addItem("BINARY");
+                typeBox.addItem("BINARY_INV");
+
+                if ("BINARY".equals(currentType) || "BINARY_INV".equals(currentType)) {
+                    typeBox.setSelectedItem(currentType);
+                } else {
+                    typeBox.setSelectedItem("BINARY");
+                }
+            } else {
+                String[] allTypes = { "BINARY", "BINARY_INV", "TRUNC", "TOZERO", "TOZERO_INV" };
+                for (String t : allTypes) {
+                    typeBox.addItem(t);
+                }
+                typeBox.setSelectedItem(currentType);
+            }
+
+
             mainContainer.revalidate();
             mainContainer.repaint();
             updateOperationInformation();

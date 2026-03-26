@@ -26,6 +26,11 @@ public class OperationFactory {
         case THRESHOLD:
             return new ThresholdOp();
 
+        case HISTOGRAM_EQ:
+            return new HistogramEqualizationOp();
+
+        case CONTRAST_STRETCH:
+            return new ContrastStretchingOp();
 		}
 		return new RotateOp();
 	}

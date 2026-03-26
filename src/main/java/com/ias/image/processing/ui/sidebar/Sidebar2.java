@@ -123,6 +123,12 @@ public class Sidebar2 extends JPanel {
         case THRESHOLD:
             opUI = new ThresholdUI(mainFrame, operation, index);
             break;
+        case HISTOGRAM_EQ:
+            opUI= new HistogramEqualizationUI(mainFrame, operation, index);
+            break;
+        case CONTRAST_STRETCH:
+            opUI = new ContrastStretchingUI(mainFrame, operation, index);
+            break;
 
 		default:
 			System.out.println("Sidebar2.createOperationPanelUI(), there is not a valid ui for " + operation.getOperationType());
@@ -139,6 +145,8 @@ public class Sidebar2 extends JPanel {
 		JMenuItem histItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.COLOR_HISTOGRAM));
 		JMenuItem grayItem  = new JMenuItem(new AddOperationAction(mainFrame, OperationType.GRAYSCALE));
         JMenuItem thresholdItem  = new JMenuItem(new AddOperationAction(mainFrame, OperationType.THRESHOLD));
+        JMenuItem heItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.HISTOGRAM_EQ));
+        JMenuItem csItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.CONTRAST_STRETCH));
 
 
         JMenuItem cropItem = new JMenuItem("Crop");
@@ -154,6 +162,8 @@ public class Sidebar2 extends JPanel {
         menu.add(histItem);
         menu.add(thresholdItem);
         menu.addSeparator();
+        menu.add(heItem);
+        menu.add(csItem);
 		menu.show(addOperationsButton, 0, addOperationsButton.getHeight());
 	}
 
