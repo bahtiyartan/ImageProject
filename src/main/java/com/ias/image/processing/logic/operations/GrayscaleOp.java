@@ -23,6 +23,18 @@ public class GrayscaleOp implements ImageOperation {
         this.method = newMethod;
     }
 
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     @Override
     public DataType getInputType() {
         return DataType.IMAGE;

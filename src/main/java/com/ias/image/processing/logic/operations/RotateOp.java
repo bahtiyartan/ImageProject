@@ -9,6 +9,17 @@ public class RotateOp implements ImageOperation {
 	private  double angle;
 	private  String hintName;
 	private Object interpolationHint;
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 	
 	
 	public RotateOp() {

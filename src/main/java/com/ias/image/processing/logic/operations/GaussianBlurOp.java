@@ -14,6 +14,17 @@ public class GaussianBlurOp implements ImageOperation {
 	private int kernelSize;
 	private double sigmaX;
 	private int borderType;
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
 	public GaussianBlurOp() {
 		this(9, 1, org.opencv.core.Core.BORDER_CONSTANT);

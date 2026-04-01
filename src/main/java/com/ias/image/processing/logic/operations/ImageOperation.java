@@ -10,6 +10,9 @@ public interface ImageOperation extends java.io.Serializable {
 	OperationType getOperationType();
 	int getOperationId();
 	String toJson();
+
+    boolean isActive();
+    void setActive(boolean active);
 }
 
 

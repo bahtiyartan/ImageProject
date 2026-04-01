@@ -13,197 +13,228 @@ import com.ias.image.processing.logic.operations.*;
 
 public class ImageController {
 
-	private final ImageModel model;
-	private Runnable updateViewCallback;
-	private String originalImagePath;
+    private final ImageModel model;
+    private Runnable updateViewCallback;
+    private String originalImagePath;
 
-	private boolean cropModeActive = false;
+    private boolean cropModeActive = false;
 
-	public ImageController(ImageModel model) {
-		this.model = model;
-	}
+    public ImageController(ImageModel model) {
+        this.model = model;
+    }
 
-	public void setUpdateViewCallback(Runnable callback) {
-		this.updateViewCallback = callback;
-	}
+    public void setUpdateViewCallback(Runnable callback) {
+        this.updateViewCallback = callback;
+    }
 
-	public void loadImage(File file) throws IOException {
-		this.originalImagePath = file.getAbsolutePath();
-		BufferedImage img = ImageIO.read(file);
-		model.getOperations().clear();
-		model.setOriginalImage(img);
-		processImage();
-	}
+    public void loadImage(File file) throws IOException {
+        this.originalImagePath = file.getAbsolutePath();
+        BufferedImage img = ImageIO.read(file);
+        model.getOperations().clear();
+        model.setOriginalImage(img);
+        processImage();
+    }
 
-	public void addOperation(ImageOperation op) {
-		model.addOperation(op);
-		processImage();
-	}
+    public void addOperation(ImageOperation op) {
+        model.addOperation(op);
+        processImage();
+    }
 
-	public void setCropModeActive(boolean active) {
-		this.cropModeActive = active;
-		if (updateViewCallback != null)
-			updateViewCallback.run();
-	}
+    public void setCropModeActive(boolean active) {
+        this.cropModeActive = active;
+        if (updateViewCallback != null)
+            updateViewCallback.run();
+    }
 
-	public boolean isCropModeActive() {
-		return cropModeActive;
-	}
+    public boolean isCropModeActive() {
+        return cropModeActive;
+    }
 
-	public void undo() {
-		List<ImageOperation> ops = model.getOperations();
-		if (!ops.isEmpty()) {
-			ops.remove(ops.size() - 1);
-			processImage();
-		} else {
-			System.out.println("There are no more actions to undo.");
-		}
-	}
+    public void undo() {
+        List<ImageOperation> ops = model.getOperations();
+        if (!ops.isEmpty()) {
+            ops.remove(ops.size() - 1);
+            processImage();
+        } else {
+            System.out.println("There are no more actions to undo.");
+        }
+    }
 
-	public void removeOperation(int index) {
-		model.getOperations().remove(index);
-		processImage();
-	}
+    public void removeOperation(int index) {
+        model.getOperations().remove(index);
+        processImage();
+    }
 
-	public void processImage() {
-		if (model.getOriginalImage() == null)
-			return;
+    public void processImage() {
+        if (model.getOriginalImage() == null)
+            return;
 
-		OperationResult currentRes = new OperationResult(model.getOriginalImage(), "Original Loaded", null, null);
+        OperationResult currentRes = new OperationResult(model.getOriginalImage(), "Original Loaded", null, null);
 
-		try {
-			for (ImageOperation op : model.getOperations()) {
-				if (op.getInputType() == DataType.IMAGE && !currentRes.hasImage()) {
-					System.err.println("Error: " + op.getOperationName() + " It's waiting for the process image, but the previous step was generating the image.");
-					break;
-				}
+        try {
+            for (ImageOperation op : model.getOperations()) {
 
-				currentRes = op.apply(currentRes);
-			}
-		} catch (Exception e) {
-			System.err.println("An error occurred while processing the image: " + e.getMessage());
-			e.printStackTrace();
-		}
+                if (op.isActive()) {
+                    if (op.getInputType() == DataType.IMAGE && !currentRes.hasImage()) {
+                        System.err.println("Error: " + op.getOperationName() + " It's waiting for the process image, but the previous step was generating the image.");
+                        break;
+                    }
+                    currentRes = op.apply(currentRes);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("An error occurred while processing the image: " + e.getMessage());
+            e.printStackTrace();
+        }
 
-		model.setCurrentResult(currentRes);
+        model.setCurrentResult(currentRes);
 
-		if (currentRes.hasImage()) {
-			model.setCurrentImage(currentRes.getImageResult());
-		}
+        if (currentRes.hasImage()) {
+            model.setCurrentImage(currentRes.getImageResult());
+        }
 
-		if (updateViewCallback != null)
-			updateViewCallback.run();
-	}
+        if (updateViewCallback != null)
+            updateViewCallback.run();
+    }
 
-	public void saveProject(File file) throws IOException {
-		File processedImageFile = new File(file.getParent(), file.getName() + "_image.png");
-		if (model.getCurrentImage() != null) {
-			ImageIO.write(model.getCurrentImage(), "png", processedImageFile);
-		}
+    public void saveProject(File file) throws IOException {
+        File processedImageFile = new File(file.getParent(), file.getName() + "_image.png");
+        if (model.getCurrentImage() != null) {
+            ImageIO.write(model.getCurrentImage(), "png", processedImageFile);
+        }
 
-		String safeImagePath = (originalImagePath != null) ? originalImagePath.replace("\\", "\\\\") : "";
-		StringBuilder json = new StringBuilder();
-		json.append("{\n");
-		json.append("\"imagePath\": \"").append(safeImagePath).append("\",\n");
-		json.append("\"operations\": [\n");
+        String safeImagePath = (originalImagePath != null) ? originalImagePath.replace("\\", "\\\\") : "";
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("\"imagePath\": \"").append(safeImagePath).append("\",\n");
+        json.append("\"operations\": [\n");
 
-		List<ImageOperation> ops = model.getOperations();
-		for (int i = 0; i < ops.size(); i++) {
-			json.append(ops.get(i).toJson());
-			if (i < ops.size() - 1)
-				json.append(",");
-			json.append("\n");
-		}
-		json.append("]\n");
-		json.append("}");
+        List<ImageOperation> ops = model.getOperations();
+        for (int i = 0; i < ops.size(); i++) {
+            json.append(ops.get(i).toJson());
+            if (i < ops.size() - 1)
+                json.append(",");
+            json.append("\n");
+        }
+        json.append("]\n");
+        json.append("}");
 
-		try (FileWriter writer = new FileWriter(file)) {
-			writer.write(json.toString());
-		}
-	}
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(json.toString());
+        }
+    }
 
-	public void loadProject(File file) throws Exception {
-		String content = new String(Files.readAllBytes(file.toPath()));
-		model.getOperations().clear();
+    public void loadProject(File file) throws Exception {
+        String content = new String(Files.readAllBytes(file.toPath()));
+        model.getOperations().clear();
 
-		String imagePath = extractField(content, "imagePath");
-		if (imagePath != null && !imagePath.isEmpty()) {
-			imagePath = imagePath.replace("\\\\", "\\");
-			this.originalImagePath = imagePath;
-			BufferedImage img = ImageIO.read(new File(imagePath));
-			model.setOriginalImage(img);
-		}
+        String imagePath = extractField(content, "imagePath");
+        if (imagePath != null && !imagePath.isEmpty()) {
+            imagePath = imagePath.replace("\\\\", "\\");
+            this.originalImagePath = imagePath;
+            BufferedImage img = ImageIO.read(new File(imagePath));
+            model.setOriginalImage(img);
+        }
 
-		int bracketStart = content.indexOf("[");
-		int bracketEnd = content.lastIndexOf("]");
+        int bracketStart = content.indexOf("[");
+        int bracketEnd = content.lastIndexOf("]");
 
-		if (bracketStart != -1 && bracketEnd != -1) {
-			String opsStr = content.substring(bracketStart + 1, bracketEnd);
-			if (!opsStr.trim().isEmpty()) {
-				String[] opJsons = opsStr.split("\\},\\s*\\{");
+        if (bracketStart != -1 && bracketEnd != -1) {
+            String opsStr = content.substring(bracketStart + 1, bracketEnd);
+            if (!opsStr.trim().isEmpty()) {
+                String[] opJsons = opsStr.split("\\},\\s*\\{");
 
-				for (String raw : opJsons) {
-					String opJson = raw.trim();
-					if (!opJson.startsWith("{"))
-						opJson = "{" + opJson;
-					if (!opJson.endsWith("}"))
-						opJson = opJson + "}";
+                for (String raw : opJsons) {
+                    String opJson = raw.trim();
+                    if (!opJson.startsWith("{"))
+                        opJson = "{" + opJson;
+                    if (!opJson.endsWith("}"))
+                        opJson = opJson + "}";
 
-					ImageOperation op = null;
-					String idStr = extractField(opJson, "operationId");
-					if (idStr != null) {
-						int id = Integer.parseInt(idStr);
-						switch (id) {
-						case 1:
-							op = CropOp.fromJson(opJson);
-							break;
-						case 2:
-							op = RotateOp.fromJson(opJson);
-							break;
-						case 3:
-							op = TileOp.fromJson(opJson);
-							break;
-						case 4:
-							op = GaussianBlurOp.fromJson(opJson);
-							break;
-						case 5:
-							op = ColorHistogramOp.fromJson(opJson);
-							break;
-						case 6:
-							op = GrayscaleOp.fromJson(opJson);
-							break;
-                        case 7:
-                            op = ThresholdOp.fromJson(opJson);
-                            break;
+                    ImageOperation op = null;
+                    String idStr = extractField(opJson, "operationId");
+                    if (idStr != null) {
+                        int id = Integer.parseInt(idStr);
+                        switch (id) {
+                            case 1:
+                                op = CropOp.fromJson(opJson);
+                                break;
+                            case 2:
+                                op = RotateOp.fromJson(opJson);
+                                break;
+                            case 3:
+                                op = TileOp.fromJson(opJson);
+                                break;
+                            case 4:
+                                op = GaussianBlurOp.fromJson(opJson);
+                                break;
+                            case 5:
+                                op = ColorHistogramOp.fromJson(opJson);
+                                break;
+                            case 6:
+                                op = GrayscaleOp.fromJson(opJson);
+                                break;
+                            case 7:
+                                op = ThresholdOp.fromJson(opJson);
+                                break;
+                            case 8:
+                                op = HistogramEqualizationOp.fromJson(opJson);
+                                break;
+                            case 9:
+                                op = ContrastStretchingOp.fromJson(opJson);
+                                break;
+                            case 10:
+                                op = KMeansOp.fromJson(opJson);
+                                break;
 
-						}
-					}
-					if (op != null)
-						model.addOperation(op);
-				}
-			}
-		}
-		processImage();
-	}
+                        }
+                    }
+                    if (op != null)
+                        model.addOperation(op);
+                }
+            }
+        }
+        processImage();
+    }
 
-	private String extractField(String json, String field) {
-		int idx = json.indexOf("\"" + field + "\"");
-		if (idx == -1)
-			return null;
-		int colon = json.indexOf(":", idx);
-		int comma = json.indexOf(",", colon);
-		int endBrace = json.indexOf("}", colon);
-		int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
-		String value = json.substring(colon + 1, end).trim();
-		return value.replace("\"", "");
-	}
+    private String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1)
+            return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }
 
-	public ImageModel getModel() {
-		return model;
-	}
+    public ImageModel getModel() {
+        return model;
+    }
 
-	public void addOperation(OperationType type) {
-		ImageOperation op = OperationFactory.createOperation(type);
-		this.addOperation(op);
-	}
+    public void addOperation(OperationType type) {
+        ImageOperation op = OperationFactory.createOperation(type);
+        this.addOperation(op);
+    }
+
+    public void moveOperationUp(int index) {
+        List<ImageOperation> ops = model.getOperations();
+        if (index > 0 && index < ops.size()) {
+            ImageOperation temp = ops.get(index);
+            ops.set(index, ops.get(index - 1));
+            ops.set(index - 1, temp);
+            processImage();
+        }
+    }
+
+    public void moveOperationDown(int index) {
+        List<ImageOperation> ops = model.getOperations();
+        if (index >= 0 && index < ops.size() - 1) {
+            ImageOperation temp = ops.get(index);
+            ops.set(index, ops.get(index + 1));
+            ops.set(index + 1, temp);
+            processImage();
+        }
+    }
 }

@@ -6,7 +6,17 @@ import java.awt.image.BufferedImage;
 public class CropOp implements ImageOperation {
 
 	private int x, y, width, height;
+    private boolean active = true;
 
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 	public CropOp() {
 		this(0, 0, 10, 10);
 	}

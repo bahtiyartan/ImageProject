@@ -10,6 +10,17 @@ public class TileOp implements ImageOperation {
 	public int countY;
 	public int spacingX;
 	public int spacingY;
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
 	public TileOp() {
 		this(1, 1, 0, 0);

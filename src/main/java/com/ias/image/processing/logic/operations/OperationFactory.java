@@ -31,6 +31,9 @@ public class OperationFactory {
 
         case CONTRAST_STRETCH:
             return new ContrastStretchingOp();
+
+        case KMEANS:
+                return new KMeansOp();
 		}
 		return new RotateOp();
 	}

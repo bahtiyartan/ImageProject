@@ -10,7 +10,8 @@ public enum OperationType {
 	GRAYSCALE(6,"GrayScale"),
     THRESHOLD(7, "Threshold"),
     HISTOGRAM_EQ(8, "Histogram Equalization"),
-    CONTRAST_STRETCH(9, "Contrast Stretching");
+    CONTRAST_STRETCH(9, "Contrast Stretching"),
+    KMEANS(10,"K-Means");
 
 
 	private final int OperationId;

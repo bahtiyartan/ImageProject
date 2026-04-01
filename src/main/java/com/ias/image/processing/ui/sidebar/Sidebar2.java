@@ -129,7 +129,9 @@ public class Sidebar2 extends JPanel {
         case CONTRAST_STRETCH:
             opUI = new ContrastStretchingUI(mainFrame, operation, index);
             break;
-
+        case KMEANS:
+            opUI = new KMeansUI(mainFrame, operation, index);
+            break;
 		default:
 			System.out.println("Sidebar2.createOperationPanelUI(), there is not a valid ui for " + operation.getOperationType());
 		}
@@ -147,7 +149,7 @@ public class Sidebar2 extends JPanel {
         JMenuItem thresholdItem  = new JMenuItem(new AddOperationAction(mainFrame, OperationType.THRESHOLD));
         JMenuItem heItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.HISTOGRAM_EQ));
         JMenuItem csItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.CONTRAST_STRETCH));
-
+        JMenuItem kmItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.KMEANS));
 
         JMenuItem cropItem = new JMenuItem("Crop");
 		cropItem.addActionListener(e -> mainFrame.controller.setCropModeActive(true));
@@ -164,6 +166,7 @@ public class Sidebar2 extends JPanel {
         menu.addSeparator();
         menu.add(heItem);
         menu.add(csItem);
+        menu.add(kmItem);
 		menu.show(addOperationsButton, 0, addOperationsButton.getHeight());
 	}
 

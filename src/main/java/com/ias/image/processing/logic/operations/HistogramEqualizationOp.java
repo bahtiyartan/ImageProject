@@ -18,6 +18,17 @@ public class HistogramEqualizationOp implements ImageOperation {
     private String mode; // std and clahe
     private double clipLimit;
     private int tileSize;
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public HistogramEqualizationOp() {
         this.mode = "Standard";

@@ -188,3 +188,46 @@ The darkest 5% of pixels are clipped directly to 0, the brightest 5% are clipped
 3. **Low-Light Photography:** In photographs taken at night or in low light, the majority of pixels are clustered toward the lower end of the range. Stretching this cluster outward makes objects significantly more distinguishable.
 
 In summary: if your goal is to give an image a more dynamic range by simply lifting the "hazy veil" over it — without compromising its naturalness — contrast stretching is always one of the first methods to reach for, and among the cleanest in terms of results.
+
+
+# K-MEANS CLUSTERING
+
+K-Means is an unsupervised machine learning algorithm that divides data points into **K** predetermined clusters based on their characteristics (typically color or intensity values). The algorithm finds the center of each cluster and assigns each pixel to the nearest center.
+
+### Why Use It
+- **Simplicity and Speed:** It is one of the easiest and most understandable methods to implement for image segmentation.
+- **Color Quantization:** Ideal for reducing the number of unique colors in an image without significantly degrading visual quality. Saves memory and processing time.
+- **Preprocessing:** By dividing the image into meaningful regions, it simplifies the work of more complex object recognition algorithms.
+
+### Where Use It
+- **Background Subtraction:** To separate the focused object and the background into different clusters if they have different color/intensity profiles.
+- **Medical Imaging:** To highlight different tissues or tumor areas in MRI or X-ray images.
+- **Satellite Images:** To automatically group different geographical areas such as forests, water, and settlements according to their pixels.
+
+### How it Works?
+1. **Initialization:** K random centroids are selected.
+2. **Assignment:** Each pixel in the image is assigned to the centroid closest to it in the color/distance space.
+3. **Update:** The average of the pixels in each cluster is taken to calculate the new centroids of the clusters.
+4. **Repeat:** Steps 2 and 3 are repeated until the centroids no longer change (or the specified number of iterations is reached).
+
+## Using K-Means in OpenCV Java
+Implementing K-Means in OpenCV Java requires changing the image's data type and shape. The algorithm deals with the pixel values (e.g., RGB or Grayscale) directly, not their positions.
+
+### PARAMETERS
+In OpenCV Java, the function is:
+`Core.kmeans(Mat data, int K, Mat bestLabels, TermCriteria criteria, int attempts, int flags, Mat centers)`
+
+- **`data`**: Data to be processed. It is **mandatory** to convert your image (Height x Width x Channel) to a one-dimensional pixel list ((Height * Width) x Channel) and set the data type to `CvType.CV_32F` (32-bit float).
+- **`K`**: Number of clusters to be created.
+- **`bestLabels`**: Output matrix. Keeps track of which cluster (0, 1, ..., K-1) each pixel belongs to.
+- **`criteria`**: Criteria that determine when the algorithm will stop. Usually set using `TermCriteria.EPS + TermCriteria.MAX_ITER` to "stop either when X iterations are reached or when the centers change by less than epsilon".
+- **`attempts`**: How many times the algorithm will run with different starting centers. The best (lowest error rate) result is returned.
+- **`flags`**: How the starting centers are selected.
+- `Core.KMEANS_RANDOM_CENTERS`: Completely random.
+- `Core.KMEANS_PP_CENTERS`: (K-Means++) Makes a smarter and more optimized starting center selection; you should usually use this. - **`centers`**: Output matrix. Holds the final center color values of the clusters.
+
+## Critical Points to Consider
+1. **Choosing the Correct 'K' Value:** You determine the K value manually. A very low K can combine different objects into the same cluster; a very high K can break a single object into parts. Techniques such as the "Elbow Method" can be used for optimization, but in image processing applications, a static value (e.g., K=2 for background and object) is usually chosen through trial and error or according to the specific problem.
+2. **Color Space Selection:** K-Means works according to the Euclidean distance it perceives. In the standard RGB/BGR space, the "color similarity" perceived by the human eye is compared with the mathematical distance.The distance doesn't always overlap. Converting the image to **LAB** or **HSV** color space with `Imgproc.cvtColor(image, labImage, Imgproc.COLOR_BGR2Lab)` before processing and then applying K-Means largely solves the problems caused by lighting differences and provides much more successful segmentation. You can return to BGR after processing is complete.
+3. **Performance and Size:** K-Means is an iterative algorithm and can run very slowly on high-resolution images. A common optimization technique to shorten processing time is to resize (downsample) the image, apply the process, and then upsample the resulting mask (labels) back to its original size.
+4. **Lack of Spatial Information:** Standard K-Means doesn't look at what the pixels next to a pixel are, it only looks at the pixel's value (color). If pixel position is also important to you, you can perform clustering on a 5-dimensional dataset by adding the coordinates of the pixels (X, Y) alongside the color channels (R, G, B) to your matrix.

@@ -19,6 +19,17 @@ public class ThresholdOp implements ImageOperation {
 
     public ThresholdOp() {
     }
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public String getMode() { return mode; }
     public double getMaxVal() { return maxVal; }

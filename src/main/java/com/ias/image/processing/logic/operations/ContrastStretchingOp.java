@@ -18,6 +18,17 @@ public class ContrastStretchingOp implements ImageOperation {
     private double targetMax; // b
     private double sourceMin; // c
     private double sourceMax; // d
+    private boolean active = true;
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public ContrastStretchingOp() {
         this.mode = "Auto (Min-Max)";
