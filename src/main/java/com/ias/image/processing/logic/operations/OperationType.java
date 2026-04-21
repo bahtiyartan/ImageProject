@@ -11,7 +11,8 @@ public enum OperationType {
     THRESHOLD(7, "Threshold"),
     HISTOGRAM_EQ(8, "Histogram Equalization"),
     CONTRAST_STRETCH(9, "Contrast Stretching"),
-    KMEANS(10,"K-Means");
+    KMEANS(10,"K-Means"),
+    BLOB_COUNTER(11, "Blob & Object Counter");
 
 
 	private final int OperationId;

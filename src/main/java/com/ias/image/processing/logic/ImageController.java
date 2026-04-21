@@ -30,7 +30,7 @@ public class ImageController {
     public void loadImage(File file) throws IOException {
         this.originalImagePath = file.getAbsolutePath();
         BufferedImage img = ImageIO.read(file);
-        model.getOperations().clear();
+        //model.getOperations().clear(); This line used to refresh the list when the image changed. We removed it.
         model.setOriginalImage(img);
         processImage();
     }
@@ -185,6 +185,9 @@ public class ImageController {
                                 break;
                             case 10:
                                 op = KMeansOp.fromJson(opJson);
+                                break;
+                            case 11:
+                                op = BlobCounterOp.fromJson(opJson);
                                 break;
 
                         }

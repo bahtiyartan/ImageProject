@@ -231,3 +231,48 @@ In OpenCV Java, the function is:
 2. **Color Space Selection:** K-Means works according to the Euclidean distance it perceives. In the standard RGB/BGR space, the "color similarity" perceived by the human eye is compared with the mathematical distance.The distance doesn't always overlap. Converting the image to **LAB** or **HSV** color space with `Imgproc.cvtColor(image, labImage, Imgproc.COLOR_BGR2Lab)` before processing and then applying K-Means largely solves the problems caused by lighting differences and provides much more successful segmentation. You can return to BGR after processing is complete.
 3. **Performance and Size:** K-Means is an iterative algorithm and can run very slowly on high-resolution images. A common optimization technique to shorten processing time is to resize (downsample) the image, apply the process, and then upsample the resulting mask (labels) back to its original size.
 4. **Lack of Spatial Information:** Standard K-Means doesn't look at what the pixels next to a pixel are, it only looks at the pixel's value (color). If pixel position is also important to you, you can perform clustering on a 5-dimensional dataset by adding the coordinates of the pixels (X, Y) alongside the color channels (R, G, B) to your matrix.
+
+
+# Blob & Object Counter Module
+
+## 1. What is the Module's Purpose?
+The Blob Counter is a module that analyzes pixels in the image processing pipeline not by their color, but by the "shape integrity" they form. It detects independent white regions (blobs) on a black background, draws around them, calculates their area, and presents the total object count to the user.
+
+## 2. How Does it Work in the Background? (Technical Infrastructure)
+The module is powered by OpenCV's `Imgproc.findContours` algorithm.
+**Black and White Rule:** The algorithm scans the rough outlines of pixels vectorially. The rule is simple: Black is considered "nothingness," and white is considered an "object."
+**Non-Destructive Drawing:** To avoid distorting the original black-and-white mask, it creates a fake 3-channel (color) image copy in the background. Green border boxes and red center points are drawn on this transparent layer.
+**Submat ROI (Pointer Magic):** When the user only wants to scan a specific region (ROI), the image is not copied to memory. RAM consumption is reduced to zero using pointer logic.
+
+## 3. Parameters and Interface (UI) Controls
+The algorithm is filtered and managed in real-time thanks to the controls in the sidebar:
+
+### A. Area Filters
+This is the most critical section where detected objects are filtered based on their pixel size.
+
+**Min Area:** Ignores small white areas (dust, sensor noise, small glares) below the specified value.
+**Max Area:** Ignores massive white areas (large background patches accidentally left white) above the specified value.
+
+### B. Visualization
+
+Determines how the analysis result will appear on the screen.
+
+**Bounding Box:** Draws a razor-sharp green rectangle surrounding the detected object.
+**Centroid:** Calculates the geometric center of gravity of the object and places a red target point there.
+**Area Text:** Writes the total pixel area of the object as yellow text directly above it.
+
+### C. Region of Interest (ROI)
+Allows focusing on a specific area instead of scanning the entire image. When X, Y, Width (W), and Height (H) values are entered, the operation only takes place within this virtual frame (if left 0, the entire image is scanned).
+
+## 4. Application Areas
+This module is the backbone of industrial computer vision projects:
+
+**Production and Quality Control:** Counting screws, pills, or castings passing on a conveyor belt.
+**Medical Imaging:** Counting and filtering blood cells, bacteria, or structures of specific tissue sizes in microscopic images.
+**Satellite and Aerial Photography:** Identifying and counting buildings or vehicles (parking lots, etc.) in a specific area.
+**Agriculture:** Counting damaged fruit on a conveyor belt or plant roots in a field.
+
+## 5. Golden Rule for Use
+
+The blob counter is an analysis tool, not a pre-processing filter. It cannot be applied directly to a color or grayscale photograph.
+For correct operation, a Threshold or K-Means process must be applied beforehand, and the image must be converted to black and white. Also, since the objects must be white and the background black, the BINARY_INV type must be selected in the Threshold module.

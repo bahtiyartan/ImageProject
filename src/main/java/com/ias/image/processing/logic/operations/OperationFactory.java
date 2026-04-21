@@ -33,7 +33,10 @@ public class OperationFactory {
             return new ContrastStretchingOp();
 
         case KMEANS:
-                return new KMeansOp();
+            return new KMeansOp();
+
+        case BLOB_COUNTER:
+            return new BlobCounterOp();
 		}
 		return new RotateOp();
 	}
