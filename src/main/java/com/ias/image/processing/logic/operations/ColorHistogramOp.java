@@ -6,43 +6,34 @@ import java.awt.image.BufferedImage;
 public class ColorHistogramOp implements ImageOperation {
 
     private int binCount;
-
     private double domRed = 0.0;
     private double domGreen = 0.0;
     private double domBlue = 0.0;
     private boolean active = true;
 
-    @Override
-    public boolean isActive() {
-        return active;
-    }
-    @Override
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+    private String lastHistogramText = "";
+    private transient Runnable onResultUpdated;
 
-    public ColorHistogramOp() {
-        this.binCount = 2;
-    }
+    public String getLastHistogramText() { return lastHistogramText; }
+    public void setOnResultUpdated(Runnable r) { this.onResultUpdated = r; }
 
-    public ColorHistogramOp(int binCount) {
-        this.binCount = binCount;
-    }
+    @Override public boolean isActive() { return active; }
+    @Override public void setActive(boolean active) { this.active = active; }
+
+    public ColorHistogramOp() { this.binCount = 2; }
+    public ColorHistogramOp(int binCount) { this.binCount = binCount; }
 
     public int getBinCount() { return binCount; }
     public double getDomRed() { return domRed; }
     public double getDomGreen() { return domGreen; }
     public double getDomBlue() { return domBlue; }
 
-    @Override
-    public DataType getInputType() {
-        return DataType.IMAGE;
+    public void updateOperation(int binCount) {
+        this.binCount = Math.max(1, binCount);
     }
 
-    @Override
-    public DataType getOutputType() {
-        return DataType.STRING;
-    }
+    @Override public DataType getInputType() { return DataType.IMAGE; }
+    @Override public DataType getOutputType() { return DataType.STRING; }
 
     @Override
     public OperationResult apply(OperationResult input) {
@@ -65,14 +56,11 @@ public class ColorHistogramOp implements ImageOperation {
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 int rgb = img.getRGB(x, y);
-
                 int r = (rgb >> 16) & 0xFF;
                 int g = (rgb >> 8) & 0xFF;
                 int b = rgb & 0xFF;
 
-                sumR += r;
-                sumG += g;
-                sumB += b;
+                sumR += r; sumG += g; sumB += b;
 
                 int rIndex = (int) (r / binSize);
                 int gIndex = (int) (g / binSize);
@@ -82,9 +70,7 @@ public class ColorHistogramOp implements ImageOperation {
                 if (gIndex >= binCount) gIndex = binCount - 1;
                 if (bIndex >= binCount) bIndex = binCount - 1;
 
-                rBins[rIndex]++;
-                gBins[gIndex]++;
-                bBins[bIndex]++;
+                rBins[rIndex]++; gBins[gIndex]++; bBins[bIndex]++;
             }
         }
         long totalSum = sumR + sumG + sumB;
@@ -104,7 +90,12 @@ public class ColorHistogramOp implements ImageOperation {
         histogramText.append("BLUE CHANNEL\n");
         appendHistogram(histogramText, bBins, totalPixels);
 
-        return new OperationResult(img, histogramText.toString().trim(), null, null);
+        this.lastHistogramText = histogramText.toString().trim();
+        if (this.onResultUpdated != null) {
+            javax.swing.SwingUtilities.invokeLater(this.onResultUpdated);
+        }
+
+        return new OperationResult(img, null, null, null);
     }
 
     private void appendHistogram(StringBuilder sb, int[] bins, int totalPixels) {
@@ -116,26 +107,13 @@ public class ColorHistogramOp implements ImageOperation {
         }
     }
 
-    @Override
-    public String getOperationName() { return "Color Histogram"; }
-
-    @Override
-    public OperationType getOperationType() { return OperationType.COLOR_HISTOGRAM; }
-
-    @Override
-    public int getOperationId() { return OperationType.COLOR_HISTOGRAM.getOperationId(); }
+    @Override public String getOperationName() { return "Color Histogram"; }
+    @Override public OperationType getOperationType() { return OperationType.COLOR_HISTOGRAM; }
+    @Override public int getOperationId() { return OperationType.COLOR_HISTOGRAM.getOperationId(); }
 
     @Override
     public String toJson() {
-        StringBuilder json = new StringBuilder();
-        json.append("{\n");
-        json.append("\"operationId\": ").append(getOperationId()).append(",\n");
-        json.append("\"operationName\": \"").append(getOperationName()).append("\",\n");
-        json.append("\"params\": {\n");
-        json.append("\"binCount\": ").append(binCount).append("\n");
-        json.append("}\n");
-        json.append("}");
-        return json.toString();
+        return "{\n\"operationId\": " + getOperationId() + ",\n\"operationName\": \"" + getOperationName() + "\",\n\"params\": {\n\"binCount\": " + binCount + "\n}\n}";
     }
 
     public static ColorHistogramOp fromJson(String json) {
@@ -148,9 +126,7 @@ public class ColorHistogramOp implements ImageOperation {
                 int end = json.indexOf("\n", start);
                 binCount = Integer.parseInt(json.substring(start, end).trim());
             }
-        } catch (Exception e) {
-            binCount = 2;
-        }
+        } catch (Exception e) { binCount = 2; }
         return new ColorHistogramOp(binCount);
     }
 }

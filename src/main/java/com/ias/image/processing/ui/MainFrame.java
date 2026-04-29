@@ -70,20 +70,17 @@ public class MainFrame extends JFrame {
 		add(loadBtn, BorderLayout.NORTH);
 
 		JPanel leftContainer = new JPanel(new BorderLayout());
-		leftContainer.setPreferredSize(new Dimension(320, 0));
+		leftContainer.setPreferredSize(new Dimension(400, 0));
 
 		JPanel projectButtonsPanel = new JPanel(new GridLayout(1, 3, 2, 2));
 		JButton saveProjBtn = new JButton("Save Project");
 		JButton loadProjBtn = new JButton("Open Project");
-		JButton showResultsBtn = new JButton("Show Results");
 
 		saveProjBtn.setFont(new Font("Arial", Font.PLAIN, 11));
 		loadProjBtn.setFont(new Font("Arial", Font.PLAIN, 11));
-		showResultsBtn.setFont(new Font("Arial", Font.PLAIN, 11));
 
 		projectButtonsPanel.add(saveProjBtn);
 		projectButtonsPanel.add(loadProjBtn);
-		projectButtonsPanel.add(showResultsBtn);
 		leftContainer.add(projectButtonsPanel, BorderLayout.NORTH);
 
 		sidebar2 = new Sidebar2(this);
@@ -142,7 +139,7 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		showResultsBtn.addActionListener(e -> {
+		/*showResultsBtn.addActionListener(e -> {
 			var res = controller.getModel().getCurrentResult();
 
 			if (res != null && (res.hasString() || res.hasInteger() || res.hasDouble())) {
@@ -162,7 +159,7 @@ public class MainFrame extends JFrame {
 						"No Results",
 						JOptionPane.WARNING_MESSAGE);
 			}
-		});
+		}); */
 
 		setupMouseListeners();
 	}

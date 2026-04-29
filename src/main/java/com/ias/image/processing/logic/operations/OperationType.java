@@ -12,7 +12,8 @@ public enum OperationType {
     HISTOGRAM_EQ(8, "Histogram Equalization"),
     CONTRAST_STRETCH(9, "Contrast Stretching"),
     KMEANS(10,"K-Means"),
-    BLOB_COUNTER(11, "Blob & Object Counter");
+    BLOB_COUNTER(11, "Blob & Object Counter"),
+    MORPHOLOGY(12, "Morphological");
 
 
 	private final int OperationId;

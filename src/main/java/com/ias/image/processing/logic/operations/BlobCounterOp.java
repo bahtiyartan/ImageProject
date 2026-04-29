@@ -28,12 +28,18 @@ public class BlobCounterOp implements ImageOperation {
 
     private int roiX = 0, roiY = 0, roiW = 0, roiH = 0;
 
+    private int lastTotalCount = 0;
+    private int lastValidCount = 0;
+    private transient Runnable onResultUpdated;
+
+    public int getLastTotalCount() { return lastTotalCount; }
+    public int getLastValidCount() { return lastValidCount; }
+    public void setOnResultUpdated(Runnable r) { this.onResultUpdated = r; }
+
     public BlobCounterOp() {}
 
-    @Override
-    public boolean isActive() { return active; }
-    @Override
-    public void setActive(boolean active) { this.active = active; }
+    @Override public boolean isActive() { return active; }
+    @Override public void setActive(boolean active) { this.active = active; }
 
     public double getMinArea() { return minArea; }
     public double getMaxArea() { return maxArea; }
@@ -57,10 +63,8 @@ public class BlobCounterOp implements ImageOperation {
         this.roiH = rh;
     }
 
-    @Override
-    public DataType getInputType() { return DataType.IMAGE; }
-    @Override
-    public DataType getOutputType() { return DataType.IMAGE; }
+    @Override public DataType getInputType() { return DataType.IMAGE; }
+    @Override public DataType getOutputType() { return DataType.IMAGE; }
 
     @Override
     public OperationResult apply(OperationResult input) {
@@ -75,6 +79,7 @@ public class BlobCounterOp implements ImageOperation {
         } else {
             src.copyTo(gray);
         }
+
         Mat binary = new Mat();
         Imgproc.threshold(gray, binary, 1, 255, Imgproc.THRESH_BINARY);
 
@@ -95,7 +100,6 @@ public class BlobCounterOp implements ImageOperation {
             int safeH = Math.min(roiH, binary.rows() - safeY);
 
             Rect roi = new Rect(safeX, safeY, safeW, safeH);
-
             procMat = new Mat(binary, roi);
             targetMat = new Mat(drawTarget, roi);
 
@@ -114,13 +118,11 @@ public class BlobCounterOp implements ImageOperation {
 
             if (area >= minArea && area <= maxArea) {
                 validRegions++;
-
                 Rect rect = Imgproc.boundingRect(contour);
 
                 if (drawBox) {
                     Imgproc.rectangle(targetMat, rect.tl(), rect.br(), new Scalar(0, 255, 0), 2);
                 }
-
                 if (drawCentroid) {
                     Moments moments = Imgproc.moments(contour);
                     if (moments.get_m00() != 0) {
@@ -129,7 +131,6 @@ public class BlobCounterOp implements ImageOperation {
                         Imgproc.circle(targetMat, new Point(cx, cy), 4, new Scalar(0, 0, 255), -1);
                     }
                 }
-
                 if (drawAreaText) {
                     String text = String.format("%.0f", area);
                     Imgproc.putText(targetMat, text, new Point(rect.x, rect.y - 5),
@@ -138,11 +139,17 @@ public class BlobCounterOp implements ImageOperation {
             }
         }
 
-        String resultString = "Total Detected Blobs: " + totalRegions + "\nValid (Filtered) Blobs: " + validRegions;
+        this.lastTotalCount = totalRegions;
+        this.lastValidCount = validRegions;
+
+        if (this.onResultUpdated != null) {
+            javax.swing.SwingUtilities.invokeLater(this.onResultUpdated);
+        }
 
         BufferedImage resultImg = mat2Img(drawTarget);
 
-        return new OperationResult(resultImg, resultString, null, null);    }
+        return new OperationResult(resultImg, null, null, null);
+    }
 
     private Mat img2Mat(BufferedImage in) {
         BufferedImage convertedImg = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_3BYTE_BGR);

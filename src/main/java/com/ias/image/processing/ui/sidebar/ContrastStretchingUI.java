@@ -7,7 +7,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.ias.image.processing.logic.operations.ImageOperation;
 import com.ias.image.processing.logic.operations.ContrastStretchingOp;
@@ -17,16 +20,19 @@ import com.ias.image.processing.ui.MainFrame;
 public class ContrastStretchingUI extends OperationUI {
 
     private JComboBox<String> modeBox;
-    private JTextField tMinField;
-    private JTextField tMaxField;
-    private JTextField sMinField;
-    private JTextField sMaxField;
+
+    private JSlider tMinSlider, tMaxSlider, sMinSlider, sMaxSlider;
+    private JTextField tMinField, tMaxField, sMinField, sMaxField;
 
     private JPanel cards;
     private CardLayout cardLayout;
 
+    private boolean isUpdating = false;
+    private MainFrame myMainFrame;
+
     public ContrastStretchingUI(MainFrame mainFrame, ImageOperation operation, int index) {
         super(mainFrame, operation, index);
+        this.myMainFrame = mainFrame;
     }
 
     @Override
@@ -36,16 +42,6 @@ public class ContrastStretchingUI extends OperationUI {
         modeBox = new JComboBox<>(new String[]{"Auto (Min-Max)", "Custom (Robust)"});
         modeBox.setSelectedItem(csOp.getMode());
 
-        tMinField = new JTextField(Double.toString(csOp.getTargetMin()), 5);
-        tMaxField = new JTextField(Double.toString(csOp.getTargetMax()), 5);
-        sMinField = new JTextField(Double.toString(csOp.getSourceMin()), 5);
-        sMaxField = new JTextField(Double.toString(csOp.getSourceMax()), 5);
-
-        tMinField.addFocusListener(this);
-        tMaxField.addFocusListener(this);
-        sMinField.addFocusListener(this);
-        sMaxField.addFocusListener(this);
-
         JPanel mainContainer = new JPanel();
         mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
 
@@ -54,11 +50,16 @@ public class ContrastStretchingUI extends OperationUI {
         modePanel.add(modeBox);
         mainContainer.add(modePanel);
 
-        JPanel targetPanel = new JPanel(new GridLayout(2, 2, 2, 2));
-        targetPanel.add(new JLabel("Target Min (a):"));
-        targetPanel.add(tMinField);
-        targetPanel.add(new JLabel("Target Max (b):"));
-        targetPanel.add(tMaxField);
+        JPanel targetPanel = new JPanel(new GridLayout(2, 1, 0, 5));
+
+        tMinSlider = createSlider((int)csOp.getTargetMin());
+        tMinField = createTextField((int)csOp.getTargetMin());
+        targetPanel.add(createSliderRow("Target Min (a):", tMinSlider, tMinField));
+
+        tMaxSlider = createSlider((int)csOp.getTargetMax());
+        tMaxField = createTextField((int)csOp.getTargetMax());
+        targetPanel.add(createSliderRow("Target Max (b):", tMaxSlider, tMaxField));
+
         mainContainer.add(targetPanel);
 
         cardLayout = new CardLayout();
@@ -67,11 +68,15 @@ public class ContrastStretchingUI extends OperationUI {
         JPanel autoCard = new JPanel(new BorderLayout());
         cards.add(autoCard, "Auto (Min-Max)");
 
-        JPanel customCard = new JPanel(new GridLayout(2, 2, 2, 2));
-        customCard.add(new JLabel("Source Min (c):"));
-        customCard.add(sMinField);
-        customCard.add(new JLabel("Source Max (d):"));
-        customCard.add(sMaxField);
+        JPanel customCard = new JPanel(new GridLayout(2, 1, 0, 5));
+        sMinSlider = createSlider((int)csOp.getSourceMin());
+        sMinField = createTextField((int)csOp.getSourceMin());
+        customCard.add(createSliderRow("Source Min (c):", sMinSlider, sMinField));
+
+        sMaxSlider = createSlider((int)csOp.getSourceMax());
+        sMaxField = createTextField((int)csOp.getSourceMax());
+        customCard.add(createSliderRow("Source Max (d):", sMaxSlider, sMaxField));
+
         cards.add(customCard, "Custom (Robust)");
 
         mainContainer.add(cards);
@@ -83,25 +88,85 @@ public class ContrastStretchingUI extends OperationUI {
             mainContainer.revalidate();
             mainContainer.repaint();
             updateOperationInformation();
+            myMainFrame.controller.processImage();
         });
+
+        setupSliderLink(tMinSlider, tMinField);
+        setupSliderLink(tMaxSlider, tMaxField);
+        setupSliderLink(sMinSlider, sMinField);
+        setupSliderLink(sMaxSlider, sMaxField);
 
         return mainContainer;
     }
 
+    private JSlider createSlider(int initialValue) {
+        JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 255, initialValue);
+        slider.setMajorTickSpacing(85);
+        slider.setPaintTicks(true);
+        return slider;
+    }
+
+    private JTextField createTextField(int initialValue) {
+        return new JTextField(String.valueOf(initialValue), 4);
+    }
+
+    private JPanel createSliderRow(String label, JSlider slider, JTextField field) {
+        JPanel row = new JPanel(new BorderLayout(5, 0));
+        row.add(new JLabel(label), BorderLayout.WEST);
+        row.add(slider, BorderLayout.CENTER);
+        row.add(field, BorderLayout.EAST);
+        return row;
+    }
+
+    private void setupSliderLink(JSlider slider, JTextField field) {
+        slider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (!isUpdating) {
+                    try {
+                        isUpdating = true;
+                        field.setText(String.valueOf(slider.getValue()));
+                        updateOperationInformation();
+
+                        if (!slider.getValueIsAdjusting() && myMainFrame != null) {
+                            myMainFrame.controller.processImage();
+                        }
+                    } finally {
+                        isUpdating = false;
+                    }
+                }
+            }
+        });
+
+        field.addActionListener(e -> {
+            if (!isUpdating) {
+                try {
+                    isUpdating = true;
+                    int val = Integer.parseInt(field.getText().trim());
+                    val = Math.max(0, Math.min(255, val)); // 0-255 Sınırı
+                    field.setText(String.valueOf(val));
+                    slider.setValue(val);
+                    updateOperationInformation();
+                    if (myMainFrame != null) myMainFrame.controller.processImage();
+                } catch (NumberFormatException ex) {
+                    field.setText(String.valueOf(slider.getValue()));
+                } finally {
+                    isUpdating = false;
+                }
+            }
+        });
+    }
+
     @Override
     protected void updateOperationInformation() {
-        try {
-            ContrastStretchingOp csOp = (ContrastStretchingOp) this.operation;
+        ContrastStretchingOp csOp = (ContrastStretchingOp) this.operation;
 
-            String mode = (String) modeBox.getSelectedItem();
-            double tMin = Double.parseDouble(tMinField.getText().trim());
-            double tMax = Double.parseDouble(tMaxField.getText().trim());
-            double sMin = Double.parseDouble(sMinField.getText().trim());
-            double sMax = Double.parseDouble(sMaxField.getText().trim());
+        String mode = (String) modeBox.getSelectedItem();
+        double tMin = tMinSlider.getValue();
+        double tMax = tMaxSlider.getValue();
+        double sMin = sMinSlider.getValue();
+        double sMax = sMaxSlider.getValue();
 
-            csOp.updateOperation(mode, tMin, tMax, sMin, sMax);
-
-        } catch (NumberFormatException ex) {
-        }
+        csOp.updateOperation(mode, tMin, tMax, sMin, sMax);
     }
 }

@@ -189,6 +189,9 @@ public class ImageController {
                             case 11:
                                 op = BlobCounterOp.fromJson(opJson);
                                 break;
+                            case 12:
+                                op = MorphologyOp.fromJson(opJson);
+                                break;
 
                         }
                     }

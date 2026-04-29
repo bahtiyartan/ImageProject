@@ -37,6 +37,10 @@ public class OperationFactory {
 
         case BLOB_COUNTER:
             return new BlobCounterOp();
+
+        case MORPHOLOGY:
+            return new MorphologyOp();
+
 		}
 		return new RotateOp();
 	}
