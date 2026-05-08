@@ -192,6 +192,9 @@ public class ImageController {
                             case 12:
                                 op = MorphologyOp.fromJson(opJson);
                                 break;
+                            case 13:
+                                op = EdgeDetectionOp.fromJson(opJson);
+                                break;
 
                         }
                     }

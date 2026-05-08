@@ -141,6 +141,10 @@ public class Sidebar2 extends JPanel {
             opUI = new MorphologyUI(mainFrame, operation, index);
             break;
 
+        case EDGE_DETECTION:
+            opUI = new EdgeDetectionUI(mainFrame, operation, index);
+            break;
+
 		default:
 			System.out.println("Sidebar2.createOperationPanelUI(), there is not a valid ui for " + operation.getOperationType());
 		}
@@ -161,6 +165,8 @@ public class Sidebar2 extends JPanel {
         JMenuItem kmItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.KMEANS));
         JMenuItem blbItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.BLOB_COUNTER));
         JMenuItem mrpItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.MORPHOLOGY));
+        JMenuItem edgItem = new JMenuItem(new AddOperationAction(mainFrame, OperationType.EDGE_DETECTION));
+
 
 
         JMenuItem cropItem = new JMenuItem("Crop");
@@ -173,6 +179,7 @@ public class Sidebar2 extends JPanel {
 		menu.addSeparator();
 		menu.add(blurItem);
 		menu.add(grayItem);
+        menu.add(edgItem);
         menu.add(histItem);
         menu.addSeparator();
         menu.add(heItem);

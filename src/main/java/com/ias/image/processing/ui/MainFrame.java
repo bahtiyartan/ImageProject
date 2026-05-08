@@ -139,28 +139,6 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		/*showResultsBtn.addActionListener(e -> {
-			var res = controller.getModel().getCurrentResult();
-
-			if (res != null && (res.hasString() || res.hasInteger() || res.hasDouble())) {
-				StringBuilder resultText = new StringBuilder("Analysis Results\n\n");
-
-				if (res.hasString()) resultText.append(res.getStringResult()).append("\n");
-				if (res.hasInteger()) resultText.append("Count: ").append(res.getIntResult()).append("\n");
-				if (res.hasDouble()) resultText.append("Value: ").append(String.format("%.2f", res.getDoubleResult())).append("\n");
-
-				JOptionPane.showMessageDialog(this,
-						resultText.toString(),
-						"Process Results",
-						JOptionPane.INFORMATION_MESSAGE);
-			} else {
-				JOptionPane.showMessageDialog(this,
-						"No specific data (String, Integer, Double) found for the current operation.\nThis operation only outputs an Image.",
-						"No Results",
-						JOptionPane.WARNING_MESSAGE);
-			}
-		}); */
-
 		setupMouseListeners();
 	}
 

@@ -13,7 +13,8 @@ public enum OperationType {
     CONTRAST_STRETCH(9, "Contrast Stretching"),
     KMEANS(10,"K-Means"),
     BLOB_COUNTER(11, "Blob & Object Counter"),
-    MORPHOLOGY(12, "Morphological");
+    MORPHOLOGY(12, "Morphological"),
+    EDGE_DETECTION(13,"Edge Detection");
 
 
 	private final int OperationId;

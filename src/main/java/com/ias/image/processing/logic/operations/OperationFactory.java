@@ -41,6 +41,9 @@ public class OperationFactory {
         case MORPHOLOGY:
             return new MorphologyOp();
 
+        case EDGE_DETECTION:
+             return new EdgeDetectionOp();
+
 		}
 		return new RotateOp();
 	}
