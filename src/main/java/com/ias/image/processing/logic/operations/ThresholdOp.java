@@ -12,7 +12,7 @@ public class ThresholdOp implements ImageOperation {
     private String mode = "Simple";
     private double maxVal = 255.0;
     private int thresholdType = Imgproc.THRESH_BINARY;
-    private double thresh = 127.0;
+    private double thresh = 110.0;
     private int adaptiveMethod = Imgproc.ADAPTIVE_THRESH_MEAN_C;
     private int blockSize = 11;
     private double C = 2.0;

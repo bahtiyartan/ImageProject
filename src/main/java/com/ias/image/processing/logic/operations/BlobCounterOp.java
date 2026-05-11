@@ -32,9 +32,9 @@ public class BlobCounterOp implements ImageOperation {
     private int lastValidCount = 0;
     private transient Runnable onResultUpdated;
 
-    public int getLastTotalCount() { return lastTotalCount; }
-    public int getLastValidCount() { return lastValidCount; }
-    public void setOnResultUpdated(Runnable r) { this.onResultUpdated = r; }
+    private transient Mat lastBinaryMat = null;
+    private transient Mat lastTargetMat = null;
+    private transient BufferedImage lastInputImage = null;
 
     public BlobCounterOp() {}
 
@@ -50,17 +50,24 @@ public class BlobCounterOp implements ImageOperation {
     public int getRoiY() { return roiY; }
     public int getRoiW() { return roiW; }
     public int getRoiH() { return roiH; }
+    public int getLastTotalCount() { return lastTotalCount; }
+    public int getLastValidCount() { return lastValidCount; }
+    public void setOnResultUpdated(Runnable r) { this.onResultUpdated = r; }
 
-    public void updateOperation(double minA, double maxA, boolean dBox, boolean dCentroid, boolean dText, int rx, int ry, int rw, int rh) {
-        this.minArea = minA;
-        this.maxArea = maxA;
+    public void updateVisualsOnly(boolean dBox, boolean dCentroid, boolean dText) {
         this.drawBox = dBox;
         this.drawCentroid = dCentroid;
         this.drawAreaText = dText;
+    }
+
+    public void updateOperation(double minA, double maxA, int rx, int ry, int rw, int rh) {
+        this.minArea = minA;
+        this.maxArea = maxA;
         this.roiX = rx;
         this.roiY = ry;
         this.roiW = rw;
         this.roiH = rh;
+        this.lastBinaryMat = null;
     }
 
     @Override public DataType getInputType() { return DataType.IMAGE; }
@@ -71,6 +78,12 @@ public class BlobCounterOp implements ImageOperation {
         if (input == null || !input.hasImage()) throw new IllegalArgumentException("Blob Counter requires IMAGE input");
 
         BufferedImage img = input.getImageResult();
+
+        if (lastBinaryMat != null && lastTargetMat != null && img == lastInputImage) {
+            return performQuickDraw();
+        }
+
+        lastInputImage = img;
         Mat src = img2Mat(img);
         Mat gray = new Mat();
 
@@ -80,27 +93,32 @@ public class BlobCounterOp implements ImageOperation {
             src.copyTo(gray);
         }
 
-        Mat binary = new Mat();
-        Imgproc.threshold(gray, binary, 1, 255, Imgproc.THRESH_BINARY);
+        lastBinaryMat = new Mat();
+        Imgproc.threshold(gray, lastBinaryMat, 1, 255, Imgproc.THRESH_BINARY);
 
-        Mat drawTarget = new Mat();
+        lastTargetMat = new Mat();
         if (src.channels() == 1) {
-            Imgproc.cvtColor(src, drawTarget, Imgproc.COLOR_GRAY2BGR);
+            Imgproc.cvtColor(src, lastTargetMat, Imgproc.COLOR_GRAY2BGR);
         } else {
-            src.copyTo(drawTarget);
+            src.copyTo(lastTargetMat);
         }
 
-        Mat procMat = binary;
+        return performQuickDraw();
+    }
+
+    private OperationResult performQuickDraw() {
+        Mat drawTarget = lastTargetMat.clone();
+        Mat procMat = lastBinaryMat;
         Mat targetMat = drawTarget;
 
         if (roiW > 0 && roiH > 0) {
             int safeX = Math.max(0, roiX);
             int safeY = Math.max(0, roiY);
-            int safeW = Math.min(roiW, binary.cols() - safeX);
-            int safeH = Math.min(roiH, binary.rows() - safeY);
+            int safeW = Math.min(roiW, lastBinaryMat.cols() - safeX);
+            int safeH = Math.min(roiH, lastBinaryMat.rows() - safeY);
 
             Rect roi = new Rect(safeX, safeY, safeW, safeH);
-            procMat = new Mat(binary, roi);
+            procMat = new Mat(lastBinaryMat, roi);
             targetMat = new Mat(drawTarget, roi);
 
             Imgproc.rectangle(drawTarget, roi.tl(), roi.br(), new Scalar(255, 0, 0), 1);
@@ -147,7 +165,6 @@ public class BlobCounterOp implements ImageOperation {
         }
 
         BufferedImage resultImg = mat2Img(drawTarget);
-
         return new OperationResult(resultImg, null, null, null);
     }
 

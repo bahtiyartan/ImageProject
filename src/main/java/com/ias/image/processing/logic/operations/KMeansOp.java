@@ -76,7 +76,7 @@ public class KMeansOp implements ImageOperation {
         Mat labels = new Mat();
         Mat centers = new Mat();
         TermCriteria criteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER, maxIter, epsilon);
-        Core.kmeans(reshaped32f, kValue, labels, criteria, 3, Core.KMEANS_PP_CENTERS, centers);
+        Core.kmeans(reshaped32f, kValue, labels, criteria, 10, Core.KMEANS_PP_CENTERS, centers);
 
         int totalPixels = (int) labels.total();
         int[] labelArr = new int[totalPixels];

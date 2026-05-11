@@ -23,12 +23,10 @@ public class BlobCounterUI extends OperationUI {
 
     private JSlider minAreaSlider, maxAreaSlider;
     private JTextField minAreaField, maxAreaField;
-
     private JCheckBox drawBoxCheck, drawCenterCheck, drawTextCheck;
     private JTextField roiXF, roiYF, roiWF, roiHF;
 
-    private JLabel totalLabel;
-    private JLabel validLabel;
+    private JLabel totalLabel, validLabel;
 
     private boolean isUpdating = false;
     private MainFrame myMainFrame;
@@ -69,7 +67,14 @@ public class BlobCounterUI extends OperationUI {
         drawCenterCheck = new JCheckBox("Centroid", bOp.isDrawCentroid());
         drawTextCheck = new JCheckBox("Area Text", bOp.isDrawAreaText());
 
-        java.awt.event.ActionListener boxListener = e -> triggerUpdate();
+        java.awt.event.ActionListener boxListener = e -> {
+            if (!isUpdating) {
+                bOp.updateVisualsOnly(drawBoxCheck.isSelected(), drawCenterCheck.isSelected(), drawTextCheck.isSelected());
+                if (myMainFrame != null) {
+                    myMainFrame.controller.processImage();
+                }
+            }
+        };
         drawBoxCheck.addActionListener(boxListener);
         drawCenterCheck.addActionListener(boxListener);
         drawTextCheck.addActionListener(boxListener);
@@ -87,11 +92,9 @@ public class BlobCounterUI extends OperationUI {
         roiWF = new JTextField(Integer.toString(bOp.getRoiW()), 4);
         roiHF = new JTextField(Integer.toString(bOp.getRoiH()), 4);
 
-        java.awt.event.ActionListener roiListener = e -> triggerUpdate();
-        roiXF.addActionListener(roiListener);
-        roiYF.addActionListener(roiListener);
-        roiWF.addActionListener(roiListener);
-        roiHF.addActionListener(roiListener);
+        java.awt.event.ActionListener roiListener = e -> triggerFullUpdate();
+        roiXF.addActionListener(roiListener); roiYF.addActionListener(roiListener);
+        roiWF.addActionListener(roiListener); roiHF.addActionListener(roiListener);
 
         roiPanel.add(new JLabel("X:")); roiPanel.add(roiXF);
         roiPanel.add(new JLabel("Y:")); roiPanel.add(roiYF);
@@ -104,6 +107,7 @@ public class BlobCounterUI extends OperationUI {
 
         totalLabel = new JLabel("TOTAL BLOBS: 0");
         totalLabel.setForeground(Color.BLACK);
+        totalLabel.setFont(new Font(totalLabel.getFont().getName(), Font.PLAIN, 10));
 
         validLabel = new JLabel("VALID OBJECTS: 0");
         validLabel.setForeground(Color.BLACK);
@@ -113,7 +117,6 @@ public class BlobCounterUI extends OperationUI {
         resultPanel.add(validLabel);
         mainPanel.add(resultPanel);
 
-        // İşlem bittiğinde etiketleri günceller
         bOp.setOnResultUpdated(() -> {
             totalLabel.setText("TOTAL BLOBS: " + bOp.getLastTotalCount());
             validLabel.setText("VALID OBJECTS: " + bOp.getLastValidCount());
@@ -147,8 +150,6 @@ public class BlobCounterUI extends OperationUI {
                         isUpdating = true;
                         field.setText(String.valueOf(slider.getValue()));
                         updateOperationInformation();
-
-                        // Sürükleme bitince resmi günceller
                         if (!slider.getValueIsAdjusting() && myMainFrame != null) {
                             myMainFrame.controller.processImage();
                         }
@@ -169,7 +170,6 @@ public class BlobCounterUI extends OperationUI {
                     }
                     field.setText(String.valueOf(val));
                     updateOperationInformation();
-
                     if (myMainFrame != null) myMainFrame.controller.processImage();
                 } catch (NumberFormatException ex) {
                     field.setText(String.valueOf(slider.getValue()));
@@ -180,7 +180,7 @@ public class BlobCounterUI extends OperationUI {
         });
     }
 
-    private void triggerUpdate() {
+    private void triggerFullUpdate() {
         if (!isUpdating) {
             updateOperationInformation();
             if (myMainFrame != null) myMainFrame.controller.processImage();
@@ -191,20 +191,15 @@ public class BlobCounterUI extends OperationUI {
     protected void updateOperationInformation() {
         try {
             BlobCounterOp bOp = (BlobCounterOp) this.operation;
-
             double minA = Double.parseDouble(minAreaField.getText().trim());
             double maxA = Double.parseDouble(maxAreaField.getText().trim());
-            boolean dBox = drawBoxCheck.isSelected();
-            boolean dCent = drawCenterCheck.isSelected();
-            boolean dText = drawTextCheck.isSelected();
 
             int rx = Integer.parseInt(roiXF.getText().trim());
             int ry = Integer.parseInt(roiYF.getText().trim());
             int rw = Integer.parseInt(roiWF.getText().trim());
             int rh = Integer.parseInt(roiHF.getText().trim());
 
-            bOp.updateOperation(minA, maxA, dBox, dCent, dText, rx, ry, rw, rh);
-        } catch (Exception ex) {
-        }
+            bOp.updateOperation(minA, maxA, rx, ry, rw, rh);
+        } catch (Exception ex) {}
     }
 }
