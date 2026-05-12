@@ -134,8 +134,41 @@ public class KMeansOp implements ImageOperation {
     public OperationType getOperationType() { return OperationType.KMEANS; }
     @Override
     public int getOperationId() { return OperationType.KMEANS.getOperationId(); }
-    @Override
-    public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
 
-    public static KMeansOp fromJson(String json) { return new KMeansOp(); }
-}
+    @Override
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"kValue\": " + kValue + ",\n" +
+                "    \"colorSpace\": \"" + colorSpace + "\",\n" +
+                "    \"maxIter\": " + maxIter + ",\n" +
+                "    \"epsilon\": " + epsilon + "\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static KMeansOp fromJson(String json) {
+        KMeansOp op = new KMeansOp();
+        try {
+            int kValue = Integer.parseInt(extractField(json, "kValue"));
+            String colorSpace = extractField(json, "colorSpace");
+            int maxIter = Integer.parseInt(extractField(json, "maxIter"));
+            double epsilon = Double.parseDouble(extractField(json, "epsilon"));
+
+            op.updateOperation(kValue, colorSpace, maxIter, epsilon);
+        } catch (Exception e) {}
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }}

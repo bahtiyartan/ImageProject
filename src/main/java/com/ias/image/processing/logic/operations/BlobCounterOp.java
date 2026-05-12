@@ -189,6 +189,54 @@ public class BlobCounterOp implements ImageOperation {
     @Override public String getOperationName() { return "Blob Counter"; }
     @Override public OperationType getOperationType() { return OperationType.BLOB_COUNTER; }
     @Override public int getOperationId() { return OperationType.BLOB_COUNTER.getOperationId(); }
-    @Override public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
-    public static BlobCounterOp fromJson(String json) { return new BlobCounterOp(); }
+
+    @Override
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"minArea\": " + minArea + ",\n" +
+                "    \"maxArea\": " + maxArea + ",\n" +
+                "    \"drawBox\": " + drawBox + ",\n" +
+                "    \"drawCentroid\": " + drawCentroid + ",\n" +
+                "    \"drawAreaText\": " + drawAreaText + ",\n" +
+                "    \"roiX\": " + roiX + ",\n" +
+                "    \"roiY\": " + roiY + ",\n" +
+                "    \"roiW\": " + roiW + ",\n" +
+                "    \"roiH\": " + roiH + "\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static BlobCounterOp fromJson(String json) {
+        BlobCounterOp op = new BlobCounterOp();
+        try {
+            double minA = Double.parseDouble(extractField(json, "minArea"));
+            double maxA = Double.parseDouble(extractField(json, "maxArea"));
+            boolean dBox = Boolean.parseBoolean(extractField(json, "drawBox"));
+            boolean dCentroid = Boolean.parseBoolean(extractField(json, "drawCentroid"));
+            boolean dText = Boolean.parseBoolean(extractField(json, "drawAreaText"));
+            int rx = Integer.parseInt(extractField(json, "roiX"));
+            int ry = Integer.parseInt(extractField(json, "roiY"));
+            int rw = Integer.parseInt(extractField(json, "roiW"));
+            int rh = Integer.parseInt(extractField(json, "roiH"));
+
+            op.updateVisualsOnly(dBox, dCentroid, dText);
+            op.updateOperation(minA, maxA, rx, ry, rw, rh);
+        } catch (Exception e) {
+        }
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }
 }

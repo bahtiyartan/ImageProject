@@ -80,7 +80,6 @@ public class ContrastStretchingOp implements ImageOperation {
             double diff = sourceMax - sourceMin;
             if (diff == 0) diff = 1.0;
 
-            // Linear transformation mathematics(y = alpha * x + beta)
             double alpha = (targetMax - targetMin) / diff;
             double beta = targetMin - (sourceMin * alpha);
 
@@ -121,8 +120,45 @@ public class ContrastStretchingOp implements ImageOperation {
     public OperationType getOperationType() { return OperationType.CONTRAST_STRETCH; }
     @Override
     public int getOperationId() { return OperationType.CONTRAST_STRETCH.getOperationId(); }
-    @Override
-    public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
 
-    public static ContrastStretchingOp fromJson(String json) { return new ContrastStretchingOp(); }
+    @Override
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"mode\": \"" + mode + "\",\n" +
+                "    \"targetMin\": " + targetMin + ",\n" +
+                "    \"targetMax\": " + targetMax + ",\n" +
+                "    \"sourceMin\": " + sourceMin + ",\n" +
+                "    \"sourceMax\": " + sourceMax + "\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static ContrastStretchingOp fromJson(String json) {
+        ContrastStretchingOp op = new ContrastStretchingOp();
+        try {
+            String pMode = extractField(json, "mode");
+            double tMin = Double.parseDouble(extractField(json, "targetMin"));
+            double tMax = Double.parseDouble(extractField(json, "targetMax"));
+            double sMin = Double.parseDouble(extractField(json, "sourceMin"));
+            double sMax = Double.parseDouble(extractField(json, "sourceMax"));
+
+            op.updateOperation(pMode, tMin, tMax, sMin, sMax);
+        } catch (Exception e) {
+        }
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }
 }

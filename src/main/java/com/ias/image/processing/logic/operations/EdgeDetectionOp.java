@@ -115,6 +115,45 @@ public class EdgeDetectionOp implements ImageOperation {
     @Override public String getOperationName() { return "Edge Detection (" + algorithm + ")"; }
     @Override public OperationType getOperationType() { return OperationType.EDGE_DETECTION; }
     @Override public int getOperationId() { return OperationType.EDGE_DETECTION.getOperationId(); }
-    @Override public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
-    public static EdgeDetectionOp fromJson(String json) { return new EdgeDetectionOp(); }
-}
+
+    @Override
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"algorithm\": \"" + algorithm + "\",\n" +
+                "    \"cannyThresh1\": " + cannyThresh1 + ",\n" +
+                "    \"cannyThresh2\": " + cannyThresh2 + ",\n" +
+                "    \"sobelDx\": " + sobelDx + ",\n" +
+                "    \"sobelDy\": " + sobelDy + ",\n" +
+                "    \"kernelSize\": " + kernelSize + "\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static EdgeDetectionOp fromJson(String json) {
+        EdgeDetectionOp op = new EdgeDetectionOp();
+        try {
+            String algo = extractField(json, "algorithm");
+            double cT1 = Double.parseDouble(extractField(json, "cannyThresh1"));
+            double cT2 = Double.parseDouble(extractField(json, "cannyThresh2"));
+            int dx = Integer.parseInt(extractField(json, "sobelDx"));
+            int dy = Integer.parseInt(extractField(json, "sobelDy"));
+            int kSize = Integer.parseInt(extractField(json, "kernelSize"));
+
+            op.updateOperation(algo, cT1, cT2, dx, dy, kSize);
+        } catch (Exception e) {}
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }}

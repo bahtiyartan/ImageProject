@@ -96,6 +96,41 @@ public class MorphologyOp implements ImageOperation {
     @Override public String getOperationName() { return "Morphology (" + morphType + ")"; }
     @Override public OperationType getOperationType() { return OperationType.MORPHOLOGY; }
     @Override public int getOperationId() { return OperationType.MORPHOLOGY.getOperationId(); }
-    @Override public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
-    public static MorphologyOp fromJson(String json) { return new MorphologyOp(); }
-}
+
+    @Override
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"morphType\": \"" + morphType + "\",\n" +
+                "    \"kernelShape\": \"" + kernelShape + "\",\n" +
+                "    \"kernelSize\": " + kernelSize + ",\n" +
+                "    \"iterations\": " + iterations + "\n" +
+                "  }\n" +
+                "}";
+    }
+
+    public static MorphologyOp fromJson(String json) {
+        MorphologyOp op = new MorphologyOp();
+        try {
+            String type = extractField(json, "morphType");
+            String shape = extractField(json, "kernelShape");
+            int size = Integer.parseInt(extractField(json, "kernelSize"));
+            int iter = Integer.parseInt(extractField(json, "iterations"));
+
+            op.updateOperation(type, shape, size, iter);
+        } catch (Exception e) {}
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }}

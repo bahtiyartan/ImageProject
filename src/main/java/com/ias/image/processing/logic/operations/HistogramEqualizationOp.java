@@ -83,7 +83,7 @@ public class HistogramEqualizationOp implements ImageOperation {
         Imgproc.cvtColor(ycrcb, dst, Imgproc.COLOR_YCrCb2BGR);
 
         BufferedImage resultImg = mat2Img(dst);
-        return new OperationResult(resultImg, "Hist. Equalization (" + mode + ")", null, null);
+        return new OperationResult(resultImg, "Histogram Equalization (" + mode + ")", null, null);
     }
 
     private Mat img2Mat(BufferedImage in) {
@@ -106,7 +106,7 @@ public class HistogramEqualizationOp implements ImageOperation {
     }
 
     @Override
-    public String getOperationName() { return "Hist. Eq. (" + mode + ")"; }
+    public String getOperationName() { return "Histogram Equalization (" + mode + ")"; }
 
     @Override
     public OperationType getOperationType() { return OperationType.HISTOGRAM_EQ; }
@@ -115,9 +115,38 @@ public class HistogramEqualizationOp implements ImageOperation {
     public int getOperationId() { return OperationType.HISTOGRAM_EQ.getOperationId(); }
 
     @Override
-    public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"mode\": \"" + mode + "\",\n" +
+                "    \"clipLimit\": " + clipLimit + ",\n" +
+                "    \"tileSize\": " + tileSize + "\n" +
+                "  }\n" +
+                "}";
+    }
 
     public static HistogramEqualizationOp fromJson(String json) {
-        return new HistogramEqualizationOp();
+        HistogramEqualizationOp op = new HistogramEqualizationOp();
+        try {
+            String pMode = extractField(json, "mode");
+            double pClip = Double.parseDouble(extractField(json, "clipLimit"));
+            int pTile = Integer.parseInt(extractField(json, "tileSize"));
+            op.updateOperation(pMode, pClip, pTile);
+        } catch (Exception e) {
+        }
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
     }
 }

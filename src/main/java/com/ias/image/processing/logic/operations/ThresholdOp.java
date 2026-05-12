@@ -113,7 +113,45 @@ public class ThresholdOp implements ImageOperation {
     public int getOperationId() { return OperationType.THRESHOLD.getOperationId(); }
 
     @Override
-    public String toJson() { return "{ \"operationId\": " + getOperationId() + " }"; }
+    public String toJson() {
+        return "{\n" +
+                "  \"operationId\": " + getOperationId() + ",\n" +
+                "  \"operationName\": \"" + getOperationName() + "\",\n" +
+                "  \"params\": {\n" +
+                "    \"mode\": \"" + mode + "\",\n" +
+                "    \"maxVal\": " + maxVal + ",\n" +
+                "    \"thresholdType\": " + thresholdType + ",\n" +
+                "    \"thresh\": " + thresh + ",\n" +
+                "    \"adaptiveMethod\": " + adaptiveMethod + ",\n" +
+                "    \"blockSize\": " + blockSize + ",\n" +
+                "    \"C\": " + C + "\n" +
+                "  }\n" +
+                "}";
+    }
 
-    public static ThresholdOp fromJson(String json) { return new ThresholdOp(); }
-}
+    public static ThresholdOp fromJson(String json) {
+        ThresholdOp op = new ThresholdOp();
+        try {
+            String mode = extractField(json, "mode");
+            double maxVal = Double.parseDouble(extractField(json, "maxVal"));
+            int thresholdType = Integer.parseInt(extractField(json, "thresholdType"));
+            double thresh = Double.parseDouble(extractField(json, "thresh"));
+            int adaptiveMethod = Integer.parseInt(extractField(json, "adaptiveMethod"));
+            int blockSize = Integer.parseInt(extractField(json, "blockSize"));
+            double C = Double.parseDouble(extractField(json, "C"));
+
+            op.updateOperation(mode, maxVal, thresholdType, thresh, adaptiveMethod, blockSize, C);
+        } catch (Exception e) {}
+        return op;
+    }
+
+    private static String extractField(String json, String field) {
+        int idx = json.indexOf("\"" + field + "\"");
+        if (idx == -1) return null;
+        int colon = json.indexOf(":", idx);
+        int comma = json.indexOf(",", colon);
+        int endBrace = json.indexOf("}", colon);
+        int end = (comma == -1) ? endBrace : Math.min(comma, endBrace);
+        String value = json.substring(colon + 1, end).trim();
+        return value.replace("\"", "");
+    }}
