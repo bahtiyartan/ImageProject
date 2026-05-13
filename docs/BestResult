@@ -1,0 +1,104 @@
+JSON records of operation logs from those that best perform object counting in car 3 image.
+
+{
+"imagePath": "C:\\Users\\argestajyer\\IdeaProjects\\ImageProject\\data\\cars3.png",
+"operations": [
+{
+"operationId": 1,
+"operationName": "Crop [9,113 1100x803]",
+"params": {
+"x": 9,
+"y": 113,
+"width": 1100,
+"height": 803
+}
+},
+{
+"operationId": 4,
+"operationName": "Gaussian Blur (K:7, sX:1.0, B:REFLECT)",
+"params": {
+"kernelSize": 7,
+"sigmaX": 1.0,
+"borderType": 2
+}
+},
+{
+"operationId": 6,
+"operationName": "Grayscale (Simple)",
+"params": {
+"method": "Simple"
+}
+},
+{
+  "operationId": 13,
+  "operationName": "Edge Detection (Canny)",
+  "params": {
+    "algorithm": "Canny",
+    "cannyThresh1": 100.0,
+    "cannyThresh2": 200.0,
+    "sobelDx": 1,
+    "sobelDy": 1,
+    "kernelSize": 3
+  }
+},
+{
+  "operationId": 9,
+  "operationName": "Contrast Stretch (Auto (Min-Max))",
+  "params": {
+    "mode": "Auto (Min-Max)",
+    "targetMin": 0.0,
+    "targetMax": 255.0,
+    "sourceMin": 50.0,
+    "sourceMax": 200.0
+  }
+},
+{
+  "operationId": 10,
+  "operationName": "K-Means (K=4)",
+  "params": {
+    "kValue": 4,
+    "colorSpace": "LAB",
+    "maxIter": 100,
+    "epsilon": 0.2
+  }
+},
+{
+  "operationId": 7,
+  "operationName": "Threshold (Simple)",
+  "params": {
+    "mode": "Simple",
+    "maxVal": 255.0,
+    "thresholdType": 0,
+    "thresh": 102.0,
+    "adaptiveMethod": 0,
+    "blockSize": 11,
+    "C": 2.0
+  }
+},
+{
+  "operationId": 12,
+  "operationName": "Morphology (Closing)",
+  "params": {
+    "morphType": "Closing",
+    "kernelShape": "Rect",
+    "kernelSize": 19,
+    "iterations": 1
+  }
+},
+{
+  "operationId": 11,
+  "operationName": "Blob Counter",
+  "params": {
+    "minArea": 615.0,
+    "maxArea": 50000.0,
+    "drawBox": true,
+    "drawCentroid": true,
+    "drawAreaText": true,
+    "roiX": 0,
+    "roiY": 0,
+    "roiW": 0,
+    "roiH": 0
+  }
+}
+]
+}
